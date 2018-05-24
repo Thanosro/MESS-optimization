@@ -9,26 +9,31 @@
 % x binary vector; shows the operational state of each gen. unit
 % O number of operational states of each generation unit
 %
-function cost_stor = MCSmd(Load_dem,No_gen_units,Op_States,Time_slots,Supply_vec)
-%     a = 0.15; % usd/kwh
+function cost_stor = MCSmd(Load_dem,No_gen_units,Op_States,Time_slots,Supply_vec_3d)
+    a = 0.15; % usd/kwh
+    p = 0.05; % usc/kWh (night price)
+    d = 20;
+    s_cap = 40;
 %     Cost_vec = a.*Supply_vec;
 % No_gen_units = Ns
 % Time_slots = T
 % Op_States = O
 % Supply_vec = gamma_3d
-    cvx_begin quiet
-    cvx_solver gurobi
-    variable x_3d(No_gen_units,Op_States,Time_slots-1) binary 
-    variable s_t_mat(1,1,Time_slots-1)
-    minimize sum(sum(sum(MATRIX)))
-    subject to 
-        % const. #2
-        Load_dem = sum(sum(Supply_vec(:,:,:).*x_3d(:,:,:))) + 
-        % const. #3
-        all(all(sum(x_3d,2))) == 1
-        % const. #4
-        0<= cumsum(s_t_mat) <= s_cap
-        % const. #5 
-        s_t_mat(:) <= d
-    cvx_end
+cost_en_3d = a*Supply_vec_3d.^2;
+cvx_begin %quiet
+cvx_solver gurobi
+variable x_3d(No_gen_units,Op_States,Time_slots-1) binary 
+variable s_t_mat_3d(1,1,Time_slots-1)
+minimize sum(sum(sum(cost_en_3d.*x_3d))) + p*(sum(s_t_mat_3d)^2)
+subject to 
+    % const. #2
+    Load_dem == sum(sum(Supply_vec_3d(:,:,:).*x_3d(:,:,:))) + s_t_mat_3d
+    % const. #3
+%     all(all(sum(x_3d,2))) == 1
+    % const. #4
+    0<= cumsum(s_t_mat_3d) <= s_cap
+    % const. #5 
+    s_t_mat_3d(:) <= d
+cvx_end
+cost_stor = s_t_mat_3d;
 end
