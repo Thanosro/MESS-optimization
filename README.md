@@ -1,5 +1,4 @@
-# Sustech2018
-Minimizing Cost of Demand Matching in Multiple Micro-grids using MESS. Code for Sustech 2018
+# Minimizing Cost of Demand Matching in Multiple Micro-grids using MESS.
 Contents:
 1. MCSmd.m : Cost minimization of single micro-grid with storage unit
 2. MCmd.m: Cost minimization of single micro-grid w/o storage unit
