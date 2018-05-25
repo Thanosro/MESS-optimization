@@ -51,11 +51,11 @@ end
 s_t_mat(:) <= d
 cumsum(s_t_mat(:)) <= s_cap
 %%
-clc; clear all;
+% clc; clear all;
 % Number of generation units
-Ns = 2;
+Ns = 5;
 % generation operational states
-O = 5;
+O = 21;
 % Time-slots within day
 T = 4;
 % maximum load demand in any timeslot (kW)
@@ -66,7 +66,16 @@ L_t = randi(MAX_DEM,1,1,T-1);
 gamma_1d = linspace(0,MAX_GEN,O); % distinct energy gen. values (0 25 50 100)
 % gamma_2d = repmat(gamma_1d,Ns,1); % number of generators arrays
 gamma_3d = repmat(gamma_1d,Ns,1,T-1); % Time slots arrays
-mim_cost = MCSmd(L_t,Ns,O,T,gamma_3d)
-
-
-
+[min_cost, stor, x_var] = MCSmd(L_t,Ns,O,T,gamma_3d);
+%%
+% code eval
+% generation units operational strategies
+disp('Operational Strategies used:')
+op_strategies = x_var.*gamma_3d
+% 
+disp(['Load demand is:' char(10) num2str(L_t)])
+% L_t
+disp(['Storage unit used:', char(10) num2str(stor)])
+% stor
+disp(['Min cost is ',char(10) num2str(min_cost)])
+disp(['Charge left is:',char(10) num2str(50-sum(stor))])
