@@ -53,15 +53,15 @@ cumsum(s_t_mat(:)) <= s_cap
 %%
 % clc; clear all;
 % Number of generation units
-Ns = 5;
+Ns = 2;
 % generation operational states
-O = 21;
+O = 5;
 % Time-slots within day
 T = 4;
 % maximum load demand in any timeslot (kW)
 MAX_DEM = 100;
 % maximum energy gen. in any timeslot (kW)
-MAX_GEN = 100;
+MAX_GEN = 50;
 L_t = randi(MAX_DEM,1,1,T-1);
 gamma_1d = linspace(0,MAX_GEN,O); % distinct energy gen. values (0 25 50 100)
 % gamma_2d = repmat(gamma_1d,Ns,1); % number of generators arrays
@@ -70,12 +70,15 @@ gamma_3d = repmat(gamma_1d,Ns,1,T-1); % Time slots arrays
 %%
 % code eval
 % generation units operational strategies
-disp('Operational Strategies used:')
-op_strategies = x_var.*gamma_3d
-% 
-disp(['Load demand is:' char(10) num2str(L_t)])
-% L_t
-disp(['Storage unit used:', char(10) num2str(stor)])
-% stor
-disp(['Min cost is ',char(10) num2str(min_cost)])
-disp(['Charge left is:',char(10) num2str(50-sum(stor))])
+% op_strategies = x_var.*gamma_3d;
+disp(['Operational Strategies used:'])
+op_strategies
+disp('Cost of generated power:')
+cost_en_3d = 0.25*op_strategies.^2
+disp(['Load demand each T is:' newline num2str(L_t)])
+disp(['Total cost of gen. power each T is:' newline num2str(sum(sum((cost_en_3d))))])
+disp(['Total cost of gen. power is:' newline num2str(sum(sum(sum((cost_en_3d)))))])
+disp(['Storage unit used:', newline num2str(stor)])
+disp(['Power cost of MESS is:' newline num2str(0.05*((sum(stor))^2)) ])
+disp(['Min cost is ',newline num2str(min_cost)])
+disp(['Charge left is:',newline num2str(500-sum(stor))])

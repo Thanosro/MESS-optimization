@@ -12,8 +12,8 @@
 function [min_cost_S, s_t_mat_3d, x_3d] = MCSmd(Load_dem,No_gen_units,Op_States,Time_slots,Supply_vec_3d)
     a = 0.25; % usd/kwh
     p = 0.05; % usc/kWh (night price)
-    d = 20;
-    s_cap = 50;
+    d = 200;
+    s_cap = 500;
 %     Cost_vec = a.*Supply_vec;
 % No_gen_units = Ns
 % Time_slots = T
@@ -27,7 +27,7 @@ variable s_t_mat_3d(1,1,Time_slots-1)
 minimize sum(sum(sum(cost_en_3d.*x_3d))) + p*(sum(s_t_mat_3d)^2)
 subject to 
     % const. #2
-    Load_dem == sum(sum(Supply_vec_3d(:,:,:).*x_3d(:,:,:))) + s_t_mat_3d;
+    Load_dem <= sum(sum(Supply_vec_3d(:,:,:).*x_3d(:,:,:))) + s_t_mat_3d;
     % const. #3
     sum(x_3d,2) == 1;
     % const. #4
