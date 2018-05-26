@@ -62,7 +62,8 @@ T = 4;
 MAX_DEM = 100;
 % maximum energy gen. in any timeslot (kW)
 MAX_GEN = 50;
-L_t = randi(MAX_DEM,1,1,T-1);
+% L_t = randi(MAX_DEM,1,1,T-1);
+L_t = MAX_DEM*ones(1,1,T-1);
 gamma_1d = linspace(0,MAX_GEN,O); % distinct energy gen. values (0 25 50 100)
 % gamma_2d = repmat(gamma_1d,Ns,1); % number of generators arrays
 gamma_3d = repmat(gamma_1d,Ns,1,T-1); % Time slots arrays
@@ -70,7 +71,7 @@ gamma_3d = repmat(gamma_1d,Ns,1,T-1); % Time slots arrays
 %%
 % code eval
 % generation units operational strategies
-% op_strategies = x_var.*gamma_3d;
+clc;
 disp(['Operational Strategies used:'])
 op_strategies
 disp('Cost of generated power:')
@@ -81,4 +82,4 @@ disp(['Total cost of gen. power is:' newline num2str(sum(sum(sum((cost_en_3d))))
 disp(['Storage unit used:', newline num2str(stor)])
 disp(['Power cost of MESS is:' newline num2str(0.05*((sum(stor))^2)) ])
 disp(['Min cost is ',newline num2str(min_cost)])
-disp(['Charge left is:',newline num2str(500-sum(stor))])
+disp(['Charge left is:',newline num2str(50-sum(stor))])
