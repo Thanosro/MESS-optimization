@@ -12,8 +12,8 @@
 function [min_cost_S, s_t_mat_3d, x_3d] = MCSmd(Load_dem,No_gen_units,Op_States,Time_slots,Supply_vec_3d)
     a = 0.25; % usd/kwh
     p = 0.05; % usc/kWh (night price)
-    d = 20;
-    s_cap = 50;
+    d = 50;
+    s_cap = 100;
 %     Cost_vec = a.*Supply_vec;
 % No_gen_units = Ns
 % Time_slots = T
