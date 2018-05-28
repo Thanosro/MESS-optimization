@@ -1,7 +1,7 @@
 % block matrix with ones(m)
-clc; clear all; %close all;
+clc; clear all; close all;
 %m # of MESS, d # of days
-m = 3; d = 2;
+m = 4; d = 5;
 % create theadjacency matrix Ad_g
 %1st: create block diagonal matrix with ones sub-blocks
 Ad_g = kron(eye(d-1),ones(m));
@@ -18,20 +18,19 @@ G = addnode(G,2);
 % add edges from S* to the 1st columns of nodes 
 % and last column of nodes to T*
 % 1st create the table with new edges
-New_ed = table([4 5 6 ;8 8 8]',[1 1 1]','VariableNames',{'EndNodes','Weight'});
+Ed_S = table([(m*d+1)*ones(1,m);1:m ]',ones(m,1),'VariableNames',{'EndNodes','Weight'});
+Ed_T = table([(m*(d-1)+1):(m*d) ;(m*d+2)*ones(1,m)]',ones(m,1),'VariableNames',{'EndNodes','Weight'});
 % 2nd add edges to graph
-G = addedge(G,New_ed);
+G = addedge(G,Ed_S);
+G = addedge(G,Ed_T);
+% connect S* and T* (add edge from m*d+2 to m*d+1 node
+G = addedge(G,m*d+2,m*d+1,1);
 % plot the graph
-figure(2)
+figure(1)
 % set(gcf, 'Position', get(0, 'Screensize'));
-plot(G)
-%%
-% add edge node indices
-% m*d+2 is T* (m*d+2)*ones(1,m)
-% m*d+1 is s* (m*d+1)*ones(1,m)
-% 1st column is 1:m
-% last column is (m*(d-1)+1):m*d
-(m*d+2)*ones(1,m)
-
+h = plot(G,'EdgeLabel',G.Edges.Weight);
+layout(h,'layered','Direction','right','Sources',m*d+1,'Sinks',[m*d+2])
 %%
 spy(adjacency(G))
+%%
+spy(incidence(G))
