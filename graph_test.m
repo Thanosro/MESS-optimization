@@ -1,7 +1,7 @@
 % block matrix with ones(m)
 clc; clear all; close all;
 %m # of MESS, d # of days
-mg = 5; days = 6;
+mg = 4; days = 6;
 % create theadjacency matrix Ad_g
 %1st: create block diagonal matrix with ones sub-blocks
 Ad_g = kron(eye(days-1),ones(mg));
@@ -11,6 +11,8 @@ Ad_g = [zeros(mg*days-mg,mg) Ad_g];
 Ad_g = [Ad_g; zeros(mg,mg*days)];
 % G is the graph
 G = digraph(Ad_g);
+% assign random weigths to the edges
+G.Edges.Weight = randi(4,numedges(G),1);
 % add two nodes S* and T*
 G = addnode(G,{'S*'});
 G = addnode(G,{'T*'});
@@ -25,6 +27,8 @@ G = addedge(G,Ed_S);
 G = addedge(G,Ed_T);
 % connect S* and T* (add edge from m*d+2 to m*d+1 node
 G = addedge(G,mg*days+2,mg*days+1,mg);
+% assign random weigths to the edges
+% G.Edges.Weight(1:mg*(days-1)) = randi(4,mg*(days-1),1);
 % plot the graph
 figure(1)
 % set(gcf, 'Position', get(0, 'Screensize'));
@@ -35,11 +39,13 @@ MESS = 3;
 if MESS > mg
     error('No of MESS > of Micro-grids')
 end
+suc_sh_pa = zeros(1,MESS);
 figure(2)
 h2 = plot(G,'EdgeLabel',G.Edges.Weight);
 layout(h2,'layered','Direction','right','Sources','S*','Sinks','T*')
 for i_rm = 1:MESS
     [P_nodes,path_len,path1] = shortestpath(G,'S*','T*');
+    suc_sh_pa(i_rm) = path_len;
     Rm_nodes = P_nodes(2:(end-1));
     G = rmnode(G,Rm_nodes);
     highlight(h2,'Edges',path1,'EdgeColor','r')
@@ -47,6 +53,10 @@ for i_rm = 1:MESS
     h2 = plot(G,'EdgeLabel',G.Edges.Weight);
     layout(h2,'layered','Direction','right','Sources','S*','Sinks','T*')
 end
+suc_sh_pa;
+disp(['Total cost is  ',num2str(sum(suc_sh_pa))])
+%%
+close all;
 %% ~~~~~~~~ Test codes ~~~~~~~~~~~~~~~~~~
 % matlab shortesh path 
 % for i_rm = 1:3
