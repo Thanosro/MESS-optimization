@@ -1,7 +1,7 @@
 % block matrix with ones(m)
 clc; clear all; close all;
 %m # of MESS, d # of days
-mg = 4; days = 6;
+mg = 3; days = 4;
 % create theadjacency matrix Ad_g
 %1st: create block diagonal matrix with ones sub-blocks
 Ad_g = kron(eye(days-1),ones(mg));
@@ -35,11 +35,14 @@ figure(1)
 h1 = plot(G,'EdgeLabel',G.Edges.Weight);
 layout(h1,'layered','Direction','right','Sources',mg*days+1,'Sinks',mg*days+2);
 %% add capacities and costs to each edge
+% add Edge Label
+G.Edges.Label = [1:numedges(G)]'
 % init. capacities
 G.Edges.Capacities = zeros(numedges(G),1);
+G.Edges.Capacities = [ ones(mg*(days-1)*mg,1) ; mg*ones(numedges(G)- mg*mg*(days-1),1)];
 % init. costs
 G.Edges.Costs = zeros(numedges(G),1);
-G.Edges.Costs = G.Edges.Weight;
+% G.Edges.Costs = G.Edges.Weight;
 %%
 MESS = 3;
 if MESS > mg
