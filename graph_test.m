@@ -1,7 +1,7 @@
 % block matrix with ones(m)
 clc; clear all; close all;
 %m # of MESS, d # of days
-mg = 3; days = 4;
+mg = 2; days = 3;
 % create theadjacency matrix Ad_g
 %1st: create block diagonal matrix with ones sub-blocks
 Ad_g = kron(eye(days-1),ones(mg));
@@ -67,7 +67,28 @@ disp(['Total cost is  ',num2str(sum(suc_sh_pa))])
 %%
 close all;
 %% ~~~~~~~~ Test codes ~~~~~~~~~~~~~~~~~~
-% matlab shortesh path 
+% Test 1
+B1 = [eye(2); zeros(6,2)];
+B2 = [zeros(2); eye(2); zeros(4,2)];
+Ad_g0 = full(adjacency(G));
+Ad_g1 = [Ad_g0(:,1:2) B1 Ad_g0(:,3:4) B2 Ad_g0(:,5:8) ]
+G0 = digraph(Ad_g1);
+figure(124)
+h12 = plot(G0)
+layout(h12,'layered','Direction','right')
+%%
+% Test 2
+% kron(eye(days-1),ones(mg));
+kron(eye(2),ones(2))
+A0 = [eye(2) zeros(2);zeros(2) ones(2)]
+AD0 = kron(eye(2),A0)
+AD0 = [zeros(8,2) AD0; zeros(2) zeros(2,8)]
+G00 = graph(AD0,'upper')
+figure(232)
+h3 = plot(G00);
+layout(h3,'layered','Direction','right','Sources', 1,'Sinks',10)
+%%
+matlab shortesh path 
 % for i_rm = 1:3
 [P_nodes,path_len,path1] = shortestpath(G,(mg*days+1),(mg*days+2));
 % end
