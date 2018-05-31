@@ -1,7 +1,7 @@
 % block matrix with ones(m)
 clc; clear all; close all;
 %m # of MESS, d # of days
-mg = 2; days = 3;
+mg = 5; days = 3;
 % create theadjacency matrix Ad_g
 %1st: create block diagonal matrix with ones sub-blocks
 Ad_g = kron(eye(days-1),ones(mg));
@@ -36,7 +36,7 @@ h1 = plot(G,'EdgeLabel',G.Edges.Weight);
 layout(h1,'layered','Direction','right','Sources',mg*days+1,'Sinks',mg*days+2);
 %% add capacities and costs to each edge
 % add Edge Label
-G.Edges.Label = [1:numedges(G)]'
+G.Edges.Label = [1:numedges(G)]';
 % init. capacities
 G.Edges.Capacities = zeros(numedges(G),1);
 G.Edges.Capacities = [ ones(mg*(days-1)*mg,1) ; mg*ones(numedges(G)- mg*mg*(days-1),1)];
@@ -67,7 +67,31 @@ disp(['Total cost is  ',num2str(sum(suc_sh_pa))])
 %%
 close all;
 %% ~~~~~~~~ Test codes ~~~~~~~~~~~~~~~~~~
-% Test 1
+
+%%
+% Test 2
+% kron(eye(days-1),ones(mg));
+% % kron(eye(2),ones(2))
+% eye(mg) is the diagonal with the cost difference with & w/o MESS
+% ones is the matrix denoting the tranfer cost from microgrid i to j
+A0 = [eye(mg) zeros(mg);zeros(mg) ones(mg)];
+AD0 = kron(eye(days-1),A0);
+% spy(AD0)
+AD1 = blkdiag(AD0,eye(mg));
+AD2 = [zeros((days-1)*2*mg+mg,mg) AD1; zeros(mg) zeros(mg,(days-1)*2*mg+mg)];
+% spy(AD2)
+G0 = digraph(AD2);
+G0 = addnode(G0,{'S*'});
+G0 = addnode(G0,{'T*'});
+Ed_S0 = table([(2*mg*days+1)*ones(mg,1) (1:mg)'],mg*ones(mg,1),'VariableNames',{'EndNodes','Weight'});
+Ed_T0 = table([ ((2*mg*days-mg+1):(2*mg*days))' (2*mg*days+2)*ones(mg,1)],mg*ones(mg,1),'VariableNames',{'EndNodes','Weight'});
+G0 = addedge(G0,Ed_S0);
+G0 = addedge(G0,Ed_T0);
+figure(232)
+h3 = plot(G0);
+layout(h3,'layered','Direction','right','Sources', 'S*','Sinks','T*')
+% highlight(h3,'Edges',,'EdgeColor','r')
+%% Test 1
 B1 = [eye(2); zeros(6,2)];
 B2 = [zeros(2); eye(2); zeros(4,2)];
 Ad_g0 = full(adjacency(G));
@@ -77,18 +101,7 @@ figure(124)
 h12 = plot(G0)
 layout(h12,'layered','Direction','right')
 %%
-% Test 2
-% kron(eye(days-1),ones(mg));
-kron(eye(2),ones(2))
-A0 = [eye(2) zeros(2);zeros(2) ones(2)]
-AD0 = kron(eye(2),A0)
-AD0 = [zeros(8,2) AD0; zeros(2) zeros(2,8)]
-G00 = graph(AD0,'upper')
-figure(232)
-h3 = plot(G00);
-layout(h3,'layered','Direction','right','Sources', 1,'Sinks',10)
-%%
-matlab shortesh path 
+% matlab shortesh path 
 % for i_rm = 1:3
 [P_nodes,path_len,path1] = shortestpath(G,(mg*days+1),(mg*days+2));
 % end
