@@ -2,6 +2,10 @@
 clc; clear all; close all;
 %m # of MESS, d # of days
 mg = 5; days = 3;
+MESS = 3;
+if MESS > mg
+    error('No of MESS > of Micro-grids')
+end
 % create theadjacency matrix Ad_g
 %1st: create block diagonal matrix with ones sub-blocks
 Ad_g = kron(eye(days-1),ones(mg));
@@ -20,13 +24,13 @@ G = addnode(G,{'T*'});
 % add edges from S* to the 1st columns of nodes 
 % and last column of nodes to T*
 % 1st create the table with new edges
-Ed_S = table([(mg*days+1)*ones(1,mg);1:mg ]',mg*ones(mg,1),'VariableNames',{'EndNodes','Weight'});
-Ed_T = table([(mg*(days-1)+1):(mg*days) ;(mg*days+2)*ones(1,mg)]',mg*ones(mg,1),'VariableNames',{'EndNodes','Weight'});
+Ed_S = table([(mg*days+1)*ones(1,mg);1:mg ]',ones(mg,1),'VariableNames',{'EndNodes','Weight'});
+Ed_T = table([(mg*(days-1)+1):(mg*days) ;(mg*days+2)*ones(1,mg)]',ones(mg,1),'VariableNames',{'EndNodes','Weight'});
 % 2nd add edges to graph
 G = addedge(G,Ed_S);
 G = addedge(G,Ed_T);
 % connect S* and T* (add edge from m*d+2 to m*d+1 node
-G = addedge(G,mg*days+2,mg*days+1,mg);
+G = addedge(G,mg*days+2,mg*days+1,MESS);
 % assign random weigths to the edges
 % G.Edges.Weight(1:mg*(days-1)) = randi(4,mg*(days-1),1);
 % plot the graph
@@ -44,10 +48,7 @@ G.Edges.Capacities = [ ones(mg*(days-1)*mg,1) ; mg*ones(numedges(G)- mg*mg*(days
 G.Edges.Costs = zeros(numedges(G),1);
 % G.Edges.Costs = G.Edges.Weight;
 %%
-MESS = 3;
-if MESS > mg
-    error('No of MESS > of Micro-grids')
-end
+
 suc_sh_pa = zeros(1,MESS);
 figure(2)
 h2 = plot(G,'EdgeLabel',G.Edges.Weight);
