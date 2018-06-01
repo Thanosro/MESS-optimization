@@ -5,16 +5,17 @@ incidence(G)*x
 %%
 cost_v = randi(5,1,numedges(G));
 %%
+cost_vec = G.Edges.Costs';
 cvx_begin
 cvx_solver gurobi
 variable fl(numedges(G),1)
 
 % maximize sum(cost_v*fl)
-maximize cost_v*fl
+minimize cost_vec*fl
 subject to 
-    incidence(G)*fl == 0;
-    0 <= fl <= G.Edges.Weight;
+    incidence(G)*fl == zeros(14,1);
+    0 <= fl <= G.Edges.Capacities;
 cvx_end
-[fl cost_v']
+[fl cost_vec']
  %% show edges on graph plot
 highlight(h1,'Edges',find(fl>0),'EdgeColor','r','LineWidth',1.5)
