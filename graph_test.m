@@ -1,8 +1,8 @@
 % block matrix with ones(m)
 clc; clear all; close all;
 %m # of MESS, d # of days
-mg = 5; days = 3;
-MESS = 3;
+mg = 3; days = 4;
+MESS = 2;
 if MESS > mg
     error('No of MESS > of Micro-grids')
 end
@@ -16,7 +16,7 @@ Ad_g = [Ad_g; zeros(mg,mg*days)];
 % G is the graph
 G = digraph(Ad_g);
 % assign random weigths to the edges
-G.Edges.Weight = randi(4,numedges(G),1);
+% G.Edges.Weight = randi(4,numedges(G),1);
 % add two nodes S* and T*
 G = addnode(G,{'S*'});
 G = addnode(G,{'T*'});
@@ -43,10 +43,11 @@ layout(h1,'layered','Direction','right','Sources',mg*days+1,'Sinks',mg*days+2);
 G.Edges.Label = [1:numedges(G)]';
 % init. capacities
 G.Edges.Capacities = zeros(numedges(G),1);
-G.Edges.Capacities = [ ones(mg*(days-1)*mg,1) ; mg*ones(numedges(G)- mg*mg*(days-1),1)];
+G.Edges.Capacities = [ ones(mg*(days-1)*mg,1) ; ones(numedges(G)- mg*mg*(days-1)-1,1); MESS];
 % init. costs
 G.Edges.Costs = zeros(numedges(G),1);
-% G.Edges.Costs = G.Edges.Weight;
+% edge cost are zero in edges connecting S* and T*
+G.Edges.Costs = [randi(4,mg*(days-1)*mg,1) ; zeros(numedges(G)- mg*mg*(days-1),1)];
 %%
 
 suc_sh_pa = zeros(1,MESS);
