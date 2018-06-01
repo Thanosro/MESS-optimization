@@ -1,7 +1,7 @@
 % block matrix with ones(m)
 clc; clear all; close all;
 %m # of MESS, d # of days
-mg = 3; days = 4;
+mg = 5; days = 4;
 MESS = 2;
 if MESS > mg
     error('No of MESS > of Micro-grids')
@@ -30,7 +30,7 @@ Ed_T = table([(mg*(days-1)+1):(mg*days) ;(mg*days+2)*ones(1,mg)]',ones(mg,1),'Va
 G = addedge(G,Ed_S);
 G = addedge(G,Ed_T);
 % connect S* and T* (add edge from m*d+2 to m*d+1 node
-G = addedge(G,mg*days+2,mg*days+1,MESS);
+% G = addedge(G,mg*days+2,mg*days+1,MESS);
 % assign random weigths to the edges
 % G.Edges.Weight(1:mg*(days-1)) = randi(4,mg*(days-1),1);
 % plot the graph
@@ -43,8 +43,11 @@ layout(h1,'layered','Direction','right','Sources',mg*days+1,'Sinks',mg*days+2);
 G.Edges.Label = [1:numedges(G)]';
 % init. capacities
 G.Edges.Capacities = zeros(numedges(G),1);
-G.Edges.Capacities = [ ones(mg*(days-1)*mg,1) ; ones(numedges(G)- mg*mg*(days-1)-1,1); MESS];
-% init. costs
+% capacities if S* and T* are connected
+% G.Edges.Capacities = [ ones(mg*(days-1)*mg,1) ; ones(numedges(G)- mg*mg*(days-1)-1,1); MESS];
+% capacites with supply and demand in S* and T*
+G.Edges.Capacities = [ ones(mg*(days-1)*mg,1) ; ones(numedges(G)- mg*mg*(days-1),1)];
+% init. costs 
 G.Edges.Costs = zeros(numedges(G),1);
 % edge cost are zero in edges connecting S* and T*
 G.Edges.Costs = [randi(4,mg*(days-1)*mg,1) ; zeros(numedges(G)- mg*mg*(days-1),1)];
