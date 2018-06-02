@@ -2,8 +2,8 @@ addpath(genpath('C:\Users\thano\OneDrive\Documents\USC\DeepSolar'))
 %% block matrix with ones(m)
 clc; clear all; close all;
 %m # of MESS, d # of days
-mg = 7; days = 4;
-MESS = 4;
+mg = 4; days = 6;
+MESS = 2;
 if MESS > mg
     error('No of MESS > of Micro-grids')
 end
@@ -34,11 +34,7 @@ G = addedge(G,Ed_T);
 % G = addedge(G,mg*days+2,mg*days+1,MESS);
 % assign random weigths to the edges
 % G.Edges.Weight(1:mg*(days-1)) = randi(4,mg*(days-1),1);
-% plot the graph
-figure(1)
-% set(gcf, 'Position', get(0, 'Screensize'));
-h1 = plot(G,'EdgeLabel',G.Edges.Weight);
-layout(h1,'layered','Direction','right','Sources',mg*days+1,'Sinks',mg*days+2);
+
 %% add capacities and costs to each edge
 % add Edge Label
 G.Edges.Label = [1:numedges(G)]';
@@ -52,8 +48,13 @@ G.Edges.Capacities = [ ones(mg*(days-1)*mg,1) ; ones(numedges(G)- mg*mg*(days-1)
 G.Edges.Costs = zeros(numedges(G),1);
 % edge cost are zero in edges connecting S* and T*
 G.Edges.Costs = [randi(4,mg*(days-1)*mg,1) ; zeros(numedges(G)- mg*mg*(days-1),1)];
+G.Edges.Weight = G.Edges.Costs;
+% plot the graph
+figure(1)
+% set(gcf, 'Position', get(0, 'Screensize'));
+h1 = plot(G,'EdgeLabel',G.Edges.Weight);
+layout(h1,'layered','Direction','right','Sources',mg*days+1,'Sinks',mg*days+2);
 %%
-
 suc_sh_pa = zeros(1,MESS);
 figure(2)
 h2 = plot(G,'EdgeLabel',G.Edges.Weight);
@@ -61,13 +62,32 @@ layout(h2,'layered','Direction','right','Sources','S*','Sinks','T*')
 for i_rm = 1:MESS
     [P_nodes,path_len,path1] = shortestpath(G,'S*','T*');
     suc_sh_pa(i_rm) = path_len;
-    Rm_nodes = P_nodes(2:(end-1));
-    G = rmnode(G,Rm_nodes);
+    % set path cost to inf, to chose 2nd shortest path
+    G.Edges.Weight(path1) = inf;
     highlight(h2,'Edges',path1,'EdgeColor','r')
     figure(i_rm+2)
     h2 = plot(G,'EdgeLabel',G.Edges.Weight);
     layout(h2,'layered','Direction','right','Sources','S*','Sinks','T*')
+    % print path
+    disp(path1)
 end
+suc_sh_pa;
+disp(['Total cost is  ',num2str(sum(suc_sh_pa))])
+%%
+suc_sh_pa = zeros(1,MESS);
+figure(2)
+h2 = plot(G,'EdgeLabel',G.Edges.Weight);
+layout(h2,'layered','Direction','right','Sources','S*','Sinks','T*')
+% for i_rm = 1:MESS
+    [P_nodes,path_len,path1] = shortestpath(G,'S*','T*');
+%     suc_sh_pa(i_rm) = path_len;
+    Rm_nodes = P_nodes(2:(end-1));
+%     G = rmnode(G,Rm_nodes);
+    highlight(h2,'Edges',path1,'EdgeColor','r')
+%     figure(i_rm+2)
+    h2 = plot(G,'EdgeLabel',G.Edges.Weight);
+    layout(h2,'layered','Direction','right','Sources','S*','Sinks','T*')
+% end
 suc_sh_pa;
 disp(['Total cost is  ',num2str(sum(suc_sh_pa))])
 %%
