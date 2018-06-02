@@ -1,12 +1,9 @@
-% block matrix with ones(m)
+addpath(genpath('C:\Users\thano\OneDrive\Documents\USC\DeepSolar'))
+%% block matrix with ones(m)
 clc; clear all; close all;
 %m # of MESS, d # of days
-<<<<<<< Updated upstream
-mg = 5; days = 4;
-=======
-mg = 3; days = 4;
->>>>>>> Stashed changes
-MESS = 2;
+mg = 7; days = 4;
+MESS = 4;
 if MESS > mg
     error('No of MESS > of Micro-grids')
 end
@@ -47,16 +44,11 @@ layout(h1,'layered','Direction','right','Sources',mg*days+1,'Sinks',mg*days+2);
 G.Edges.Label = [1:numedges(G)]';
 % init. capacities
 G.Edges.Capacities = zeros(numedges(G),1);
-<<<<<<< Updated upstream
 % capacities if S* and T* are connected
 % G.Edges.Capacities = [ ones(mg*(days-1)*mg,1) ; ones(numedges(G)- mg*mg*(days-1)-1,1); MESS];
 % capacites with supply and demand in S* and T*
 G.Edges.Capacities = [ ones(mg*(days-1)*mg,1) ; ones(numedges(G)- mg*mg*(days-1),1)];
-% init. costs 
-=======
-G.Edges.Capacities = [ ones(mg*(days-1)*mg,1) ; ones(numedges(G)- mg*mg*(days-1)-1,1); MESS];
 % init. costs
->>>>>>> Stashed changes
 G.Edges.Costs = zeros(numedges(G),1);
 % edge cost are zero in edges connecting S* and T*
 G.Edges.Costs = [randi(4,mg*(days-1)*mg,1) ; zeros(numedges(G)- mg*mg*(days-1),1)];
