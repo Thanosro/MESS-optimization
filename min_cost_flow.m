@@ -1,9 +1,9 @@
 % syms x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 real 
 % x = [x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13]';
-x = randi(4,numedges(G),1);
-incidence(G)*x
-%%
-cost_v = randi(5,1,numedges(G));
+% x = randi(4,numedges(G),1);
+% incidence(G)*x
+% %%
+% cost_v = randi(5,1,numedges(G));
 %%
 cost_vec = G.Edges.Costs';
 cvx_begin
@@ -33,25 +33,26 @@ ind_ed = ed_mat((fl1>0),:);
 ind_mod_ed = mod(ind_ed,mg);
 % if any element is 0 then it is the mg-th micro-grid
 ind_mod_ed(ind_mod_ed == 0) = mg;
-% final matrix with micro-grid scheduling
-mic_mat = ind_mod_ed
+% final matrix of micro-grid scheduling
+mic_mat = ind_mod_ed;
 %% print result 
 clc;
 disp('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 disp('Day 1')
 for i_mic = 1:(days-1)*MESS
     disp(['Transfer from ',num2str(mic_mat(i_mic,1)),' to ',num2str(mic_mat(i_mic,2))]);
-    if mod(i_mic,MESS) == 0
+    if mod(i_mic,MESS) == 0 && i_mic ~= (days-1)*MESS
         disp(['Day ',num2str((i_mic/MESS)+1)]);
     end
 end
+disp(['Total cost is ',num2str(G.Edges.Costs'*fl)])
 %%
 % reproduce result with:
 mg = 7; days = 4;
 MESS = 4;
 G.Edges.Costs = [1;3;1;1;3;1;4;4;3;1;3;3;4;3;4;2;2;4;1;1;...
-    1;2;4;4;1;2;3;2;3;3;2;2;1;4;1;1;2;1;2;2;4;4;1;3;2;2;3;4;2...
-    ;4;2;3;3;3;3;3;1;1;4;1;1;3;4;3;1;2;2;4;1;4;3;2;1;2;2;1;3;1;2;...
+    1;2;4;4;1;2;3;2;3;3;2;2;1;4;1;1;2;1;2;2;4;4;1;3;2;2;3;4;2;...
+   4;2;3;3;3;3;3;1;1;4;1;1;3;4;3;1;2;2;4;1;4;3;2;1;2;2;1;3;1;2;...
     3;2;2;3;2;4;4;3;2;3;1;4;4;4;2;3;1;2;2;1;1;2;1;3;2;3;3;3;1;1;2;3;3;...
     2;4;3;4;3;2;1;3;4;2;1;2;1;2;2;3;2;4;3;4;3;4;1;3;2;3;3;1;2;1;3;4;2;4;3;...
     0;0;0;0;0;0;0;0;0;0;0;0;0;0];
