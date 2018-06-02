@@ -11,9 +11,15 @@ cvx_solver gurobi
 variable fl(numedges(G),1)
 
 % maximize sum(cost_v*fl)
+<<<<<<< Updated upstream
 minimize cost_vec*fl
 subject to 
     incidence(G)*fl == [ zeros((numnodes(G)-2),1); -MESS; MESS];
+=======
+maximize cost_vec*fl
+subject to 
+    incidence(G)*fl == zeros(14,1);
+>>>>>>> Stashed changes
     0 <= fl <= G.Edges.Capacities;
 cvx_end
 [fl cost_vec']
