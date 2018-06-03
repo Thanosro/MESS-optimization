@@ -1,10 +1,10 @@
 % graph with node split
 clc; clear all; close all;
 %m , d # of days
-mg = 3; days = 3;
+mg = 5; days = 7;
 % # of MESS
-K = 2;
-if K>mg
+MESS = 3;
+if MESS>mg
        error('No of MESS > of Micro-grids')
 end
 % eye(mg) is the diagonal with the cost difference with & w/o MESS
@@ -16,30 +16,73 @@ AD1 = blkdiag(AD0,eye(mg));
 AD2 = [zeros((days-1)*2*mg+mg,mg) AD1; zeros(mg) zeros(mg,(days-1)*2*mg+mg)];
 % spy(AD2)
 G0 = digraph(AD2);
+% initial number of edges
+init_edges = numedges(G0);
 G0 = addnode(G0,{'S*'});
 G0 = addnode(G0,{'T*'});
-Ed_S0 = table([(2*mg*days+1)*ones(mg,1) (1:mg)'],K*ones(mg,1),'VariableNames',{'EndNodes','Weight'});
-Ed_T0 = table([ ((2*mg*days-mg+1):(2*mg*days))' (2*mg*days+2)*ones(mg,1)],K*ones(mg,1),'VariableNames',{'EndNodes','Weight'});
+Ed_S0 = table([(2*mg*days+1)*ones(mg,1) (1:mg)'],MESS*ones(mg,1),'VariableNames',{'EndNodes','Weight'});
+Ed_T0 = table([ ((2*mg*days-mg+1):(2*mg*days))' (2*mg*days+2)*ones(mg,1)],MESS*ones(mg,1),'VariableNames',{'EndNodes','Weight'});
 G0 = addedge(G0,Ed_S0);
 G0 = addedge(G0,Ed_T0);
-% G0 = addedge(G0,2*mg*days+2,2*mg*days+1,K);
-figure(232)
-h3 =plot(G0,'EdgeLabel',G0.Edges.Weight);
+%% add edges costs and capacities 
+% edge capacities are 1 except those of S* and T* with capacity equal to
+% the # of MESS
+G0.Edges.Capacities = [ones(init_edges,1); MESS*ones(length((init_edges+1):numedges(G0)),1) ];
+% edges have random cost; edges from S* and T* have zero costs
+G0.Edges.Costs = [ randi(4,init_edges,1) ; zeros(length((init_edges+1):numedges(G0)),1)];
+G0.Edges.Weight = G0.Edges.Costs;
+% assign label nodes
+G0.Edges.Labels = (1:numedges(G0))';
+figure(1)
+h3 =plot(G0,'EdgeLabel',G0.Edges.Costs);
 layout(h3,'layered','Direction','right','Sources', 'S*','Sinks','T*')
 % highlight(h3,'Edges',,'EdgeColor','r')
 %%
-cost_v = randi(5,1,numedges(G0));
-%%
+cost_v = G0.Edges.Costs';
 cvx_begin
 cvx_solver gurobi
 variable fl(numedges(G0),1)
 % maximize sum(cost_v*fl)
 minimize cost_v*fl
 subject to 
-%     incidence(G0)*fl == 0;
-    incidence(G0)*fl == [zeros(numnodes(G0)-2,1); -K; K];
-    0 <= fl <= G0.Edges.Weight;
+    incidence(G0)*fl == [zeros(numnodes(G0)-2,1); -MESS; MESS];
+    0 <= fl <= G0.Edges.Capacities;
 cvx_end
-[fl cost_v']
+[fl cost_v'];
+disp(['Total cost: ',num2str(cost_v*fl)])
 %%
 highlight(h3,'Edges',find(fl>0),'EdgeColor','r','LineWidth',1.5)
+%% find path of nodes 
+% find start and end nodes of edges with flow
+[st_ed,end_ed] = findedge(G0);
+% create matrix of nodes
+ed_mat1 = [st_ed end_ed];
+% remove the last 2*mg rows which include nodes S* and T*
+ed_mat = ed_mat1(1:(end-2*mg),:);
+fl1 = fl(1:(end-2*mg),:);
+% index matrix of the nodes of the graph with flow
+ind_ed = ed_mat((fl1>0),:);
+% reshape the matrix to chose every other row
+res_ind_ed = [reshape(ind_ed',2*MESS,[])]';
+% chooose even rows of the reshaped array until no of rows size(res_ind_ed,1)
+res_ind_ed = res_ind_ed(2:2:size(res_ind_ed,1),:);
+% reshape the even rows of the reshaped matrix
+ind_ed2 = [reshape(res_ind_ed',2,[])]';
+
+%% mod ind_ed with mg to find which micro-grid it belonds
+ind_mod_ed = mod(ind_ed2,mg);
+% if any element is 0 then it is the mg-th micro-grid
+ind_mod_ed(ind_mod_ed == 0) = mg;
+% final matrix of micro-grid scheduling
+mic_mat = ind_mod_ed;
+%% print result 
+clc;
+disp('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+disp('Day 1')
+for i_mic = 1:(days-1)*MESS
+    disp(['Transfer from ',num2str(mic_mat(i_mic,1)),' to ',num2str(mic_mat(i_mic,2))]);
+    if mod(i_mic,MESS) == 0 && i_mic ~= (days-1)*MESS
+        disp(['Day ',num2str((i_mic/MESS)+1)]);
+    end
+end
+disp(['Total cost is ',num2str(G0.Edges.Costs'*fl)])
