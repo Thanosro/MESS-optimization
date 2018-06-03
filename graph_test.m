@@ -2,8 +2,8 @@ addpath(genpath('C:\Users\thano\OneDrive\Documents\USC\DeepSolar'))
 %% block matrix with ones(m)
 clc; clear all; close all;
 %m # of MESS, d # of days
-mg = 4; days = 6;
-MESS = 2;
+mg = 5; days = 6;
+MESS = 4;
 if MESS > mg
     error('No of MESS > of Micro-grids')
 end
@@ -58,11 +58,13 @@ layout(h1,'layered','Direction','right','Sources',mg*days+1,'Sinks',mg*days+2);
 suc_sh_pa = zeros(1,MESS);
 figure(2)
 h2 = plot(G,'EdgeLabel',G.Edges.Weight);
-layout(h2,'layered','Direction','right','Sources','S*','Sinks','T*')
+layout(h2,'layered','Direction','right','Sources','S*','Sinks','T*');
+% succesive shortest paths
 for i_rm = 1:MESS
+    % shortest path from S* to T*
     [P_nodes,path_len,path1] = shortestpath(G,'S*','T*');
     suc_sh_pa(i_rm) = path_len;
-    % set path cost to inf, to chose 2nd shortest path
+    % set path cost to inf, to chose next shortest path
     G.Edges.Weight(path1) = inf;
     highlight(h2,'Edges',path1,'EdgeColor','r')
     figure(i_rm+2)
