@@ -1,10 +1,13 @@
+addpath(genpath('C:\Users\Thanos\Documents\DeepSolar'))
+cd C:\Users\Thanos\Documents\DeepSolar\Systech\sims\MESS-optimization
+%%
 % graph with node split
 clc; clear all; close all;
 %m , d # of days
-mg = 5; days = 7;
+mg = 3; days = 5;
 % # of MESS
-MESS = 3;
-if MESS>mg
+MESS = 2;
+if MESS > mg
        error('No of MESS > of Micro-grids')
 end
 % eye(mg) is the diagonal with the cost difference with & w/o MESS
@@ -34,8 +37,8 @@ G0.Edges.Weight = G0.Edges.Costs;
 % assign label nodes
 G0.Edges.Labels = (1:numedges(G0))';
 figure(1)
-h3 =plot(G0,'EdgeLabel',G0.Edges.Costs);
-layout(h3,'layered','Direction','right','Sources', 'S*','Sinks','T*')
+h1 =plot(G0,'EdgeLabel',G0.Edges.Costs);
+layout(h1,'layered','Direction','right','Sources', 'S*','Sinks','T*')
 % highlight(h3,'Edges',,'EdgeColor','r')
 %%
 cost_v = G0.Edges.Costs';
@@ -51,7 +54,7 @@ cvx_end
 [fl cost_v'];
 disp(['Total cost: ',num2str(cost_v*fl)])
 %%
-highlight(h3,'Edges',find(fl>0),'EdgeColor','r','LineWidth',1.5)
+highlight(h1,'Edges',find(fl>0),'EdgeColor','r','LineWidth',1.5)
 %% find path of nodes 
 % find start and end nodes of edges with flow
 [st_ed,end_ed] = findedge(G0);
@@ -68,14 +71,13 @@ res_ind_ed = [reshape(ind_ed',2*MESS,[])]';
 res_ind_ed = res_ind_ed(2:2:size(res_ind_ed,1),:);
 % reshape the even rows of the reshaped matrix
 ind_ed2 = [reshape(res_ind_ed',2,[])]';
-
 %% mod ind_ed with mg to find which micro-grid it belonds
 ind_mod_ed = mod(ind_ed2,mg);
 % if any element is 0 then it is the mg-th micro-grid
 ind_mod_ed(ind_mod_ed == 0) = mg;
 % final matrix of micro-grid scheduling
 mic_mat = ind_mod_ed;
-%% print result 
+%% print result from LP min cost 
 clc;
 disp('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 disp('Day 1')
@@ -85,4 +87,25 @@ for i_mic = 1:(days-1)*MESS
         disp(['Day ',num2str((i_mic/MESS)+1)]);
     end
 end
-disp(['Total cost is ',num2str(G0.Edges.Costs'*fl)])
+disp(['Total cost with LP is: ',num2str(G0.Edges.Costs'*fl)])
+%%
+Gs = G0;
+suc_sh_pa = zeros(1,MESS);
+figure(2)
+h2 = plot(Gs,'EdgeLabel',Gs.Edges.Weight);
+layout(h2,'layered','Direction','right','Sources','S*','Sinks','T*')
+for i_rm = 1:MESS
+    [P_nodes,path_len,path1] = shortestpath(Gs,'S*','T*');
+    suc_sh_pa(i_rm) = path_len;
+    Rm_nodes = P_nodes(2:(end-1));
+%     G = rmnode(G,Rm_nodes);
+    Gs.Edges.Weight(path1) = inf;
+    highlight(h2,'Edges',path1,'EdgeColor','r','LineWidth',1.5)
+%     figure(i_rm+2)
+%     h2 = plot(Gs,'EdgeLabel',Gs.Edges.Weight);
+    layout(h2,'layered','Direction','right','Sources','S*','Sinks','T*')
+end
+suc_sh_pa;
+disp(['Total cost with shortesth paths is  ',num2str(sum(suc_sh_pa))])
+
+
