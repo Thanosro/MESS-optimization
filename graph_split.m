@@ -107,5 +107,7 @@ for i_rm = 1:MESS
 end
 suc_sh_pa;
 disp(['Total cost with shortesth paths is  ',num2str(sum(suc_sh_pa))])
+% test line
+
 
 
