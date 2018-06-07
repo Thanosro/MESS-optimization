@@ -107,7 +107,10 @@ for i_rm = 1:MESS
 end
 suc_sh_pa;
 disp(['Total cost with shortesth paths is  ',num2str(sum(suc_sh_pa))])
-% test line
-
+%% find the paths from LP min cost flow solution 
+for i_path = 1:MESS
+    mic_mat(i_path:MESS:size(mic_mat,1),:)
+end
+% 
 
 
