@@ -11,20 +11,25 @@
 %
 function [min_cost_S, s_t_mat_3d, x_3d] = MCSmd(Load_dem,No_gen_units,Op_States,Time_slots,Supply_vec_3d)
     a = 0.25; % usd/kwh
-    p = 0.05; % usc/kWh (night price)
-    d = 50;
-    s_cap = 100;
+    p = 0.05; % usd/kWh (night price)
+    % constraint with storage
+%     d = 0.5;
+%     d = 1;
+    % constraint without storage
+    d = 0;
+    s_cap = 5;
 %     Cost_vec = a.*Supply_vec;
 % No_gen_units = Ns
 % Time_slots = T
 % Op_States = O
 % Supply_vec = gamma_3d
-cost_en_3d = a*Supply_vec_3d.^2;
+% cost_en_3d = a*Supply_vec_3d.^2;
+cost_en_3d = a*Supply_vec_3d;
 cvx_begin quiet
 cvx_solver gurobi
 variable x_3d(No_gen_units,Op_States,Time_slots-1) binary 
 variable s_t_mat_3d(1,1,Time_slots-1)
-minimize sum(sum(sum(cost_en_3d.*x_3d))) + p*(sum(s_t_mat_3d)^2)
+minimize sum(sum(sum(cost_en_3d.*x_3d))) + p*(sum(s_t_mat_3d))%^2)
 subject to 
     % const. #2
     Load_dem <= sum(sum(Supply_vec_3d(:,:,:).*x_3d(:,:,:))) + s_t_mat_3d;
@@ -35,5 +40,5 @@ subject to
     % const. #5 
    0 <= s_t_mat_3d(:) <= d;
 cvx_end
-min_cost_S = sum(sum(sum(cost_en_3d.*x_3d))) + p*(sum(s_t_mat_3d)^2);
+min_cost_S = sum(sum(sum(cost_en_3d.*x_3d))) + p*(sum(s_t_mat_3d));%^2);
 end

@@ -1,6 +1,9 @@
 addpath(genpath('C:\Users\Thanos\Documents\DeepSolar'))
 cd C:\Users\Thanos\Documents\DeepSolar\Systech\sims\MESS-optimization
 %%
+addpath(genpath('C:\Users\thano\OneDrive\Documents\USC'))
+cd C:\Users\thano\OneDrive\Documents\USC\DeepSolar\sustech\MESS-optimization-master\MESS-optimization
+%%
 % graph with node split
 clc; clear all; close all;
 %m , d # of days
@@ -43,15 +46,17 @@ layout(h1,'layered','Direction','right','Sources', 'S*','Sinks','T*')
 % highlight(h3,'Edges',,'EdgeColor','r')
 %%
 cost_v = G0.Edges.Costs';
+tic;
 cvx_begin
 cvx_solver gurobi
-variable fl(numedges(G0),1)
+variable fl(numedges(G0),1)  %integer
 % maximize sum(cost_v*fl)
 minimize cost_v*fl
 subject to 
     incidence(G0)*fl == [zeros(numnodes(G0)-2,1); -MESS; MESS];
     0 <= fl <= G0.Edges.Capacities;
 cvx_end
+toc;
 [fl cost_v'];
 disp(['Total cost: ',num2str(cost_v*fl)])
 %%
@@ -89,6 +94,7 @@ for i_mic = 1:(days-1)*MESS
     end
 end
 disp(['Total cost with LP is: ',num2str(G0.Edges.Costs'*fl)])
+
 %%
 Gs = G0;
 suc_sh_pa = zeros(1,MESS);
@@ -122,13 +128,48 @@ for i_n_path = 1:length(psOut)
     [psOut(next_node_index) ptOut(next_node_index)] 
     i_n_path = next_node_index;
 end
+
+%%
+% for i_MESS = 1:MESS
+% the next path is the st_ind row:
+% st_ind = find(ind_ed_s(:,1) == ind_ed_s(i_MESS,2))
+st_ind = find(ind_ed_s(:,1) == ind_ed_s(1,2))
+np = [0 0];
+
+while max(np) < numnodes(Gs)
+% next path row:
+np = ind_ed_s(st_ind,:);
+% next node is: 
+nex_nd = np(2);
+% iterate
+st_ind = find(ind_ed_s(:,1) == nex_nd);
+% i_path
+% path_mat(:,i_path) = np
+path_mat(i_path,:) = np;
+end
+path_mat
+% node ID's of the 1st path
+unique(path_mat)
+% end
+% find edges with start & end nodes in path mat"
+edges_id = findedge(Gs,path_mat(:,1),path_mat(:,2))
+sum(Gs.Edges.Costs(edges_id))
+% plot each path with green in new figure
+figure(3)
+h3 = plot(Gs);%,'EdgeLabel',Gs.Edges.Weight);
+layout(h3,'layered','Direction','right','Sources','S*','Sinks','T*')
+highlight(h3,'Edges',edges_id,'EdgeColor','g','LineWidth',1.5)
+title('Plot ind. paths')
+
 %% extract sub-graph from G0 graph with the shortest paths 
-ind_ed_s =  ed_mat1(fl>0,:);
+% ind_ed_s =  ed_mat1(fl>0,:);
 % H0 = subgraph(G0,unique(ind_ed_s));
-H0 = subgraph(G0,unique(ind_ed));
+H0 = subgraph(G0,unique(path_mat));
 H0 = addnode(H0,{'S*'});
-H0 = addnode(H0,{'T*'});
+% H0 = addnode(H0,{'T*'});
 figure(443)
 h55 =plot(H0,'EdgeLabel',H0.Edges.Costs);
 layout(h55,'layered','Direction','right','Sources', 'S*','Sinks','T*')
 [diff_paths test_car]= conncomp(H0,'Type','weak')
+
+
