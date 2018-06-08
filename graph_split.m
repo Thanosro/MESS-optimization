@@ -33,6 +33,7 @@ G0 = addedge(G0,Ed_T0);
 G0.Edges.Capacities = [ones(init_edges,1); MESS*ones(length((init_edges+1):numedges(G0)),1) ];
 % edges have random cost; edges from S* and T* have zero costs
 G0.Edges.Costs = [ randi(4,init_edges,1) ; zeros(length((init_edges+1):numedges(G0)),1)];
+% G0.Edges.Costs = [ 4*rand(init_edges,1) ; zeros(length((init_edges+1):numedges(G0)),1)];
 G0.Edges.Weight = G0.Edges.Costs;
 % assign label nodes
 G0.Edges.Labels = (1:numedges(G0))';
@@ -111,6 +112,23 @@ disp(['Total cost with shortesth paths is  ',num2str(sum(suc_sh_pa))])
 for i_path = 1:MESS
     mic_mat(i_path:MESS:size(mic_mat,1),:)
 end
-% 
-
-
+%%
+clc
+s_path = Gs.Edges.Labels(fl>0);
+[psOut,ptOut] = findedge(Gs,s_path);
+[psOut ptOut];
+for i_n_path = 1:length(psOut)
+    next_node_index = find(ptOut(i_n_path) == psOut(:,:))
+    [psOut(next_node_index) ptOut(next_node_index)] 
+    i_n_path = next_node_index;
+end
+%% extract sub-graph from G0 graph with the shortest paths 
+ind_ed_s =  ed_mat1(fl>0,:);
+% H0 = subgraph(G0,unique(ind_ed_s));
+H0 = subgraph(G0,unique(ind_ed));
+H0 = addnode(H0,{'S*'});
+H0 = addnode(H0,{'T*'});
+figure(443)
+h55 =plot(H0,'EdgeLabel',H0.Edges.Costs);
+layout(h55,'layered','Direction','right','Sources', 'S*','Sinks','T*')
+[diff_paths test_car]= conncomp(H0,'Type','weak')
