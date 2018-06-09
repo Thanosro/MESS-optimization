@@ -130,31 +130,47 @@ for i_n_path = 1:length(psOut)
 end
 
 %%
-% for i_MESS = 1:MESS
+ ind_ed_s = ed_mat((fl1>0),:);
+%  number of edges between S* and T* w/o weights
+ dis_S_T = distances(Gs,numnodes(Gs)-1,numnodes(Gs),'Method','unweighted');
+ % distance between day 1 and last day:
+ dis_d1_dl = dis_S_T - 2;
+for i_MESS = 1:MESS
+    disp(['+++++++++ Path #',num2str(i_MESS),'++++++++++++++'])
 % the next path is the st_ind row:
 % st_ind = find(ind_ed_s(:,1) == ind_ed_s(i_MESS,2))
-st_ind = find(ind_ed_s(:,1) == ind_ed_s(1,2))
-np = [0 0];
-
-while max(np) < numnodes(Gs)
-% next path row:
-np = ind_ed_s(st_ind,:);
-% next node is: 
-nex_nd = np(2);
-% iterate
-st_ind = find(ind_ed_s(:,1) == nex_nd);
-% i_path
-% path_mat(:,i_path) = np
-path_mat(i_path,:) = np;
+   
+    st_ind = find(ind_ed_s(:,1) == ind_ed_s(1,2));
+    np = [0 0];
+%     np = ind_ed_s(st_ind,:)
+    i_path = 0;
+    for i__path = 1:(dis_d1_dl-1)
+        np = ind_ed_s(st_ind,:);
+        % next node is: 
+        nex_nd = np(2);
+        % iterate
+        st_ind = find(ind_ed_s(:,1) == nex_nd);
+        i_path = i_path + 1;
+        % path_mat(:,i_path) = np
+        path_mat(i_path,:) = np;
+    end
+    fin_path_mat = [ind_ed_s(1,:) ; path_mat]
+    % node ID's of the 1st path
+    node_ids = unique(fin_path_mat);
+    % end
+    % find edges with start & end nodes in path mat"
+    edges_id = findedge(Gs,fin_path_mat(:,1),fin_path_mat(:,2));
+    path_cost = sum(Gs.Edges.Costs(edges_id));
+    % remove the node ID's from the original matrix and repeat
+    % compare the difference in the elements of each column individualy
+    dif_col1 = setdiff(ind_ed_s(:,1),fin_path_mat(:,1));
+    dif_col2 = setdiff(ind_ed_s(:,2),fin_path_mat(:,2));
+    dif_col = [dif_col1 dif_col2];
+    %dif col is the new ind_ed_s matrix
+   ind_ed_s = dif_col;
+   Aaaasdads = 523424;
 end
-path_mat
-% node ID's of the 1st path
-unique(path_mat)
-% end
-% find edges with start & end nodes in path mat"
-edges_id = findedge(Gs,path_mat(:,1),path_mat(:,2))
-sum(Gs.Edges.Costs(edges_id))
-% plot each path with green in new figure
+%% plot each path with green in new figure
 figure(3)
 h3 = plot(Gs);%,'EdgeLabel',Gs.Edges.Weight);
 layout(h3,'layered','Direction','right','Sources','S*','Sinks','T*')
