@@ -2,7 +2,7 @@ addpath(genpath('C:\Users\Thanos\Documents\DeepSolar'))
 cd C:\Users\Thanos\Documents\DeepSolar\Systech\sims\MESS-optimization
 %% read dataset commands
 % read the 3rd coluumn as an array 
-L_t_ar = xlsread('gen_2015.csv','C:C');
+% L_t_ar = xlsread('gen_2015.csv','C:C');
 %% load the array 
 % loads as struct
 L_t_str = load('Pecan_load.mat');
