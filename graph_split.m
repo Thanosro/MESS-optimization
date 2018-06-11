@@ -7,7 +7,7 @@ cd C:\Users\thano\OneDrive\Documents\USC\DeepSolar\sustech\MESS-optimization-mas
 % graph with node split
 clc; clear all; close all;
 %m , d # of days
-mg = 3; days = 5;
+mg = 3; days = 4;
 % # of MESS
 MESS = 2;
 if MESS > mg
@@ -43,6 +43,7 @@ G0.Edges.Labels = (1:numedges(G0))';
 figure(1)
 h1 =plot(G0,'EdgeLabel',G0.Edges.Costs);
 layout(h1,'layered','Direction','right','Sources', 'S*','Sinks','T*')
+title('Min cost flow LP')
 % highlight(h3,'Edges',,'EdgeColor','r')
 %%
 cost_v = G0.Edges.Costs';
@@ -97,10 +98,14 @@ disp(['Total cost with LP is: ',num2str(G0.Edges.Costs'*fl)])
 
 %%
 Gs = G0;
+% compare edges costs
+isequal(Gs.Edges.Weight,G0.Edges.Costs)
+%%
 suc_sh_pa = zeros(1,MESS);
 figure(2)
 h2 = plot(Gs,'EdgeLabel',Gs.Edges.Weight);
 layout(h2,'layered','Direction','right','Sources','S*','Sinks','T*')
+title('Shortest Paths')
 for i_rm = 1:MESS
     [P_nodes,path_len,path1] = shortestpath(Gs,'S*','T*');
     suc_sh_pa(i_rm) = path_len;
@@ -115,26 +120,12 @@ end
 suc_sh_pa;
 disp(['Total cost with shortesth paths is  ',num2str(sum(suc_sh_pa))])
 %% find the paths from LP min cost flow solution 
-for i_path = 1:MESS
-    mic_mat(i_path:MESS:size(mic_mat,1),:)
-end
-%%
-clc
-s_path = Gs.Edges.Labels(fl>0);
-[psOut,ptOut] = findedge(Gs,s_path);
-[psOut ptOut];
-for i_n_path = 1:length(psOut)
-    next_node_index = find(ptOut(i_n_path) == psOut(:,:))
-    [psOut(next_node_index) ptOut(next_node_index)] 
-    i_n_path = next_node_index;
-end
-
-%%
- ind_ed_s = ed_mat((fl1>0),:);
+ind_ed_s = ed_mat((fl1>0),:);
 %  number of edges between S* and T* w/o weights
- dis_S_T = distances(Gs,numnodes(Gs)-1,numnodes(Gs),'Method','unweighted');
+dis_S_T = distances(G0,numnodes(G0)-1,numnodes(G0),'Method','unweighted');
  % distance between day 1 and last day:
  dis_d1_dl = dis_S_T - 2;
+ disp('**********LP min cost ******************')
 for i_MESS = 1:MESS
     disp(['+++++++++ Path #',num2str(i_MESS),'++++++++++++++'])
 % the next path is the st_ind row:
@@ -154,13 +145,14 @@ for i_MESS = 1:MESS
         % path_mat(:,i_path) = np
         path_mat(i_path,:) = np;
     end
-    fin_path_mat = [ind_ed_s(1,:) ; path_mat]
+    fin_path_mat = [ind_ed_s(1,:) ; path_mat];
     % node ID's of the 1st path
     node_ids = unique(fin_path_mat);
     % end
     % find edges with start & end nodes in path mat"
-    edges_id = findedge(Gs,fin_path_mat(:,1),fin_path_mat(:,2));
-    path_cost = sum(Gs.Edges.Costs(edges_id));
+    edges_id = findedge(G0,fin_path_mat(:,1),fin_path_mat(:,2));
+    path_cost(i_MESS) = sum(G0.Edges.Costs(edges_id)); 
+    disp(['Cost of ',num2str(i_MESS),' path is: ',num2str(path_cost(i_MESS))])
     % remove the node ID's from the original matrix and repeat
     % compare the difference in the elements of each column individualy
     dif_col1 = setdiff(ind_ed_s(:,1),fin_path_mat(:,1));
@@ -168,8 +160,8 @@ for i_MESS = 1:MESS
     dif_col = [dif_col1 dif_col2];
     %dif col is the new ind_ed_s matrix
    ind_ed_s = dif_col;
-   Aaaasdads = 523424;
 end
+disp(['Total cost is: ',num2str(sum(path_cost))])
 %% plot each path with green in new figure
 figure(3)
 h3 = plot(Gs);%,'EdgeLabel',Gs.Edges.Weight);
@@ -187,5 +179,43 @@ figure(443)
 h55 =plot(H0,'EdgeLabel',H0.Edges.Costs);
 layout(h55,'layered','Direction','right','Sources', 'S*','Sinks','T*')
 [diff_paths test_car]= conncomp(H0,'Type','weak')
+%%
+% test the different edges in the 2 approaches
+% edges in shortest paths: isinf(Gs.Edges.Weight)
+% edges in in LP min-cost flow: fl
+dif_egd = [isinf(Gs.Edges.Weight) fl]
+% comparison between the 2 columns and return the index of the differences
+(dif_egd(:,1) == dif_egd(:,2)) == 0
+(dif_egd(:,1) == 1) == (dif_egd(:,2) == 1)
+
+[find(dif_egd(:,1) == 1) find(dif_egd(:,2) == 1)]
 
 
+%% test code
+for i_path = 1:MESS
+    mic_mat(i_path:MESS:size(mic_mat,1),:)
+end
+%%
+clc
+s_path = Gs.Edges.Labels(fl>0);
+[psOut,ptOut] = findedge(Gs,s_path);
+[psOut ptOut];
+for i_n_path = 1:length(psOut)
+    next_node_index = find(ptOut(i_n_path) == psOut(:,:))
+    [psOut(next_node_index) ptOut(next_node_index)] 
+    i_n_path = next_node_index;
+end
+%% test code edge label 
+Ed_lbls = reshape(G0.Edges.Labels,mg,[]);
+% add 1 column at start
+Ed_lbls = [zeros(mg,1) Ed_lbls(:,:)];
+Ed_lbls(:,1) = Ed_lbls(:,end);
+Ed_lbls(:,end) = [];
+Ed_lbls =  flipud(Ed_lbls);
+%% matrix with zeros same as Ed_lbls to show the paths
+Ind_G0 = zeros(size(Ed_lbls));
+% Ind_G0(fl>0) = 1;
+Ind_Gs = zeros(size(Ed_lbls));
+
+%%
+highlight(h1,'Edges',68,'EdgeColor','r','LineWidth',1.5)
