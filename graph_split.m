@@ -1,5 +1,6 @@
 addpath(genpath('C:\Users\Thanos\Documents\DeepSolar'))
 cd C:\Users\Thanos\Documents\DeepSolar\Systech\sims\MESS-optimization
+rmpath('C:\Users\Thanos\Documents\DeepSolar\Optimal_flow\cvx\lib\narginchk_')
 %%
 addpath(genpath('C:\Users\thano\OneDrive\Documents\USC'))
 cd C:\Users\thano\OneDrive\Documents\USC\DeepSolar\sustech\MESS-optimization-master\MESS-optimization
@@ -85,7 +86,7 @@ ind_mod_ed(ind_mod_ed == 0) = mg;
 % final matrix of micro-grid scheduling
 mic_mat = ind_mod_ed;
 %% print result from LP min cost 
-clc;
+% clc;
 disp('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 disp('Day 1')
 for i_mic = 1:(days-1)*MESS
@@ -210,24 +211,22 @@ disp(['Cost of each path of LP is: ',newline,num2str(sum(G0.Edges.Costs(LP_path_
 % sum(G0.Edges.Costs(LP_path_mat))
 disp(['Cost of each path with Shortest paths is:',newline,num2str(sum(Gs.Edges.Costs(Shortest_path_mat)))])
 % sum(Gs.Edges.Costs(Shortest_path_mat))
-disp('The increasing length of each path with LP is:')
+disp('The increasing cost of each path with LP is:')
 disp(num2str(cumsum(G0.Edges.Costs(LP_path_mat))))
 % cumsum(G0.Edges.Costs(LP_path_mat))
-disp('The increasing length of each path with Shortest Path is')
+disp('The increasing cost of each path with Shortest Path is')
 disp(num2str(cumsum(Gs.Edges.Costs(Shortest_path_mat))))
 % cumsum(Gs.Edges.Costs(Shortest_path_mat))
 %% DEBUGGING plot the increasing cost 
-figure(45)
-plot([cumsum(Gs.Edges.Costs(Shortest_path_mat))])
-title('Increasing path cost short. paths')
-xlabel('# of edges')
-ylabel('Cost')
-figure(46)
-plot([cumsum(G0.Edges.Costs(LP_path_mat))])
-title('Increasing path cost LP')
-xlabel('# of edges')
-ylabel('Cost')
-figure(50)
+for i_plot = 1:MESS
+    figure(46+i_plot)
+    plot([cumsum(Gs.Edges.Costs(Shortest_path_mat(:,i_plot))) cumsum(G0.Edges.Costs(LP_path_mat(:,i_plot))) ])
+    title(['Increasing cost of path # ',num2str(i_plot)])
+    xlabel('# of edges')
+    ylabel('Cost')
+    legend('SP','LP')
+end
+figure(100)
 plot([sum([cumsum(G0.Edges.Costs(LP_path_mat))],2) sum(cumsum(Gs.Edges.Costs(Shortest_path_mat)),2)])
 title('Comparison increasing path cost')
 xlabel('# of edges')
@@ -254,7 +253,7 @@ layout(h55,'layered','Direction','right','Sources', 'S*','Sinks','T*')
 % edges in shortest paths: isinf(Gs.Edges.Weight)
 % edges in in LP min-cost flow: fl
 dif_egd = [isinf(Gs.Edges.Weight) fl]
-% comparison between the 2 columns and return the index of the differences
+% compare between the 2 columns and return the index of the differences
 (dif_egd(:,1) == dif_egd(:,2)) == 0
 (dif_egd(:,1) == 1) == (dif_egd(:,2) == 1)
 
