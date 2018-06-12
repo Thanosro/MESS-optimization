@@ -4,6 +4,7 @@ rmpath('C:\Users\Thanos\Documents\DeepSolar\Optimal_flow\cvx\lib\narginchk_')
 %%
 addpath(genpath('C:\Users\thano\OneDrive\Documents\USC'))
 cd C:\Users\thano\OneDrive\Documents\USC\DeepSolar\sustech\MESS-optimization-master\MESS-optimization
+rmpath('C:\Users\thano\OneDrive\Documents\USC\DeepSolar\OPF\cvx\lib\narginchk_')
 %%
 % graph with node split
 clc; clear all; close all;
@@ -49,7 +50,7 @@ title('Min cost flow LP')
 %%
 cost_v = G0.Edges.Costs';
 tic;
-cvx_begin
+cvx_begin quiet
 cvx_solver gurobi
 variable fl(numedges(G0),1)  %integer
 % maximize sum(cost_v*fl)
@@ -231,7 +232,19 @@ plot([sum([cumsum(G0.Edges.Costs(LP_path_mat))],2) sum(cumsum(Gs.Edges.Costs(Sho
 title('Comparison increasing path cost')
 xlabel('# of edges')
 ylabel('Cost')
-legend('SP','LP')
+legend('LP','SP')
+%% DEGUBBING FIND FROM EACH NODE NEXT AVAILABLE NODES & EDGES' COSTS
+% LP %
+ind_ed2(:,1) % shows nodes in each path chosen by LP
+for i_nx_nd = 1:2:size(ind_ed2,1)
+    disp('Index of available edges is:')
+    outedges(G0,ind_ed2(i_nx_nd,1))
+    disp('Cost of available edges is:')
+    G0.Edges.Costs(outedges(G0,ind_ed2(i_nx_nd,1)))
+    % print which edge the algorithm chose 
+%     disp(['LP chose edges # ',num2str(),' with cost',num2str()])
+end
+% G0.Edges.Costs(outedges(G0,ind_ed(i_nx_nd,1)))
 %% plot each path with green in new figure
 figure(3)
 h3 = plot(Gs);%,'EdgeLabel',Gs.Edges.Weight);
