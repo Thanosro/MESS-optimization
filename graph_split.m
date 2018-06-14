@@ -112,7 +112,8 @@ layout(h2,'layered','Direction','right','Sources','S*','Sinks','T*')
 title('Shortest Paths')
 disp('******* Shortest Paths Costs ***********')
 for i_rm = 1:MESS
-    [P_nodes,path_len,path1] = shortestpath(Gs,'S*','T*');
+    [P_nodes,path_len,path1] = shortestpath(Gs,'S*','T*','Method','mixed');
+%     [P_nodes,path_len,path1] = shortestpath(Gs,'S*','T*');
     suc_sh_pa(i_rm) = path_len;
     Rm_nodes = P_nodes(2:(end-1));
 %     G = rmnode(G,Rm_nodes);
@@ -235,14 +236,23 @@ ylabel('Cost')
 legend('LP','SP')
 %% DEGUBBING FIND FROM EACH NODE NEXT AVAILABLE NODES & EDGES' COSTS
 % LP %
-ind_ed2(:,1) % shows nodes in each path chosen by LP
+ind_ed2(:,1); % shows nodes in each path chosen by LP
 for i_nx_nd = 1:2:size(ind_ed2,1)
+    in_av_edges = outedges(G0,ind_ed2(i_nx_nd,1));
     disp('Index of available edges is:')
-    outedges(G0,ind_ed2(i_nx_nd,1))
-    disp('Cost of available edges is:')
-    G0.Edges.Costs(outedges(G0,ind_ed2(i_nx_nd,1)))
-    % print which edge the algorithm chose 
-%     disp(['LP chose edges # ',num2str(),' with cost',num2str()])
+    disp(num2str(in_av_edges))
+    cost_avail_edges = G0.Edges.Costs(outedges(G0,ind_ed2(i_nx_nd,1)));
+    disp('Cost of available edges is: ')
+    disp(num2str(cost_avail_edges))
+    
+    % print which edge the algorithm chose:
+    % the index shows all the available edges, 1 of which has flow
+    % using the index of available edges in_av_edges we can check which of
+    % the edges has flow:
+%     [in_av_edges fl(in_av_edges)]
+    chosen_edge = in_av_edges'*fl(in_av_edges);
+    disp(['LP chose edge # ',num2str(chosen_edge),' with cost ',num2str(G0.Edges.Costs(chosen_edge))])
+    disp('-----------Next Edge-------------')
 end
 % G0.Edges.Costs(outedges(G0,ind_ed(i_nx_nd,1)))
 %% plot each path with green in new figure
