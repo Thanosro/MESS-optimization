@@ -11,7 +11,7 @@ clc; clear all; close all;
 %m , d # of days
 mg = 4; days =7;
 % # of MESS
-MESS = 2;
+MESS = 3;
 if MESS > mg
        error('No of MESS > of Micro-grids')
 end
@@ -150,22 +150,21 @@ dis_S_T = distances(G0,numnodes(G0)-1,numnodes(G0),'Method','unweighted');
  dis_d1_dl = dis_S_T - 2;
 %  edges_id_mat = zeros(1,MESS);
  disp('******* LP min cost individual Paths ***********')
-for i_MESS = 1:MESS
+for i_MESS = 1:(MESS-1)
     disp(['+++++++++ Path #',num2str(i_MESS),'++++++++++++++'])
 % the next path is the st_ind row:
 % st_ind = find(ind_ed_s(:,1) == ind_ed_s(i_MESS,2))
-   
-    st_ind = find(ind_ed_s(:,1) == ind_ed_s(1,2));
+       st_ind = find(ind_ed_s(:,1) == ind_ed_s(1,2));
     np = [0 0];
 %     np = ind_ed_s(st_ind,:)
-    i_path = 0;
-    for i__path = 1:(dis_d1_dl-1)
+%     i_path = 0;
+    for i_path = 1:(dis_d1_dl-1)
         np = ind_ed_s(st_ind,:);
         % next node is: 
         nex_nd = np(2);
         % iterate
         st_ind = find(ind_ed_s(:,1) == nex_nd);
-        i_path = i_path + 1;
+%         i_path = i_path + 1;
         % path_mat(:,i_path) = np
         path_mat(i_path,:) = np;
     end
@@ -188,8 +187,26 @@ for i_MESS = 1:MESS
     %dif col is the new ind_ed_s matrix
    ind_ed_s = dif_col;
 end
+disp(['+++++++++ Path #',num2str(i_MESS+1),'++++++++++++++'])
+edges_id = findedge(G0,ind_ed_s(:,1),ind_ed_s(:,2));
+path_cost(i_MESS+1) = sum(G0.Edges.Costs(edges_id));
+LP_path_mat(:,i_MESS+1) = edges_id';
+disp(['Cost of ',num2str(i_MESS+1),' path is: ',num2str(path_cost(i_MESS+1))])
 disp(['Total cost is with LP: ',num2str(sum(path_cost))])
 disp(newline)
+%% test plots 
+figure(1342)
+h44 =plot(G0);%,'EdgeLabel',G0.Edges.Costs);
+layout(h44,'layered','Direction','right','Sources', 'S*','Sinks','T*');
+title('TEST LP')
+highlight(h44,'Edges',[1:numedges(G0)],'EdgeColor','g','LineWidth',0.25);
+%%
+% select which path to highlight
+PATH_NO = 2;
+highlight(h44,'Edges',LP_path_mat(4,:),'EdgeColor','k','LineWidth',1.5)
+% highlight(h44,'Edges',LP_path_mat(:,PATH_NO),'EdgeColor','k','LineWidth',1.5)
+title(['LP Cost ',num2str(PATH_NO), ': ', num2str(path_cost(PATH_NO))])
+
 %% DEBUG compare pahts from 2 solutions
 % remove 1st and last row of Shortest path mat cuz it's the edges S* T*
 % if condition holds to run the code more than once
@@ -237,7 +254,7 @@ legend('LP','SP')
 %% DEGUBBING FIND FROM EACH NODE NEXT AVAILABLE NODES & EDGES' COSTS
 % LP %
 ind_ed2(:,1); % shows nodes in each path chosen by LP
-for i_nx_nd = 1:2:size(ind_ed2,1)
+for i_nx_nd = 1:MESS:size(ind_ed2,1)
     in_av_edges = outedges(G0,ind_ed2(i_nx_nd,1));
     disp('Index of available edges is:')
     disp(num2str(in_av_edges))
