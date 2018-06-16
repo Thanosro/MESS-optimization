@@ -143,7 +143,10 @@ end
 disp('******************************')
 disp(newline)
 %% find the paths from LP min cost flow solution 
-ind_ed_s = ed_mat((fl1>0),:);
+% ind_ed_s = ed_mat((fl1>0),:);
+% start and end nodes of edges with flow
+[st_nd, end_nd] = findedge(G0,find(fl1>0));
+ind_ed_s = [st_nd end_nd];
 %  number of edges between S* and T* w/o weights
 dis_S_T = distances(G0,numnodes(G0)-1,numnodes(G0),'Method','unweighted');
  % distance between day 1 and last day:
@@ -153,8 +156,8 @@ dis_S_T = distances(G0,numnodes(G0)-1,numnodes(G0),'Method','unweighted');
 for i_MESS = 1:(MESS-1)
     disp(['+++++++++ Path #',num2str(i_MESS),'++++++++++++++'])
 % the next path is the st_ind row:
-% st_ind = find(ind_ed_s(:,1) == ind_ed_s(i_MESS,2))
-       st_ind = find(ind_ed_s(:,1) == ind_ed_s(1,2));
+% st_ind = find(ind_ed_s(:,1) == ind_ed_s(i_MESS,2));
+    st_ind = find(ind_ed_s(:,1) == ind_ed_s(1,2));
     np = [0 0];
 %     np = ind_ed_s(st_ind,:)
 %     i_path = 0;
@@ -186,6 +189,8 @@ for i_MESS = 1:(MESS-1)
     dif_col = [dif_col1 dif_col2];
     %dif col is the new ind_ed_s matrix
    ind_ed_s = dif_col;
+%     [log_TF, del_ind] = ismember(fin_path_mat, ind_ed_s,'rows');
+%     ind_ed_s(del_ind) = [];
 end
 disp(['+++++++++ Path #',num2str(i_MESS+1),'++++++++++++++'])
 edges_id = findedge(G0,ind_ed_s(:,1),ind_ed_s(:,2));
@@ -194,6 +199,13 @@ LP_path_mat(:,i_MESS+1) = edges_id';
 disp(['Cost of ',num2str(i_MESS+1),' path is: ',num2str(path_cost(i_MESS+1))])
 disp(['Total cost is with LP: ',num2str(sum(path_cost))])
 disp(newline)
+%%
+clearvars ind_ed_s i_MESS st_ind np path_cost path_len path_mat nex_nd dif_col dif_col1 dif_col2 fin_path_mat i_path edges_id node_ids
+%% edge label from the debugging part & edge labels ffrom min cost flow LP
+% deb_edges = [reshape(LP_path_mat,[],1) G0.Edges.Costs(reshape(LP_path_mat,[],1)) G0.Edges.Labels(fl1>0) G0.Edges.Costs(fl1>0)]
+deb_edges2 = [sort(reshape(LP_path_mat,[],1)) G0.Edges.Costs(reshape(LP_path_mat,[],1)) G0.Edges.Labels(fl1>0) G0.Edges.Costs(fl1>0)]
+isequal(deb_edges2(:,1), deb_edges2(:,3))
+sum([deb_edges2(:,2) deb_edges2(:,4)])
 %% test plots 
 figure(1342)
 h44 =plot(G0);%,'EdgeLabel',G0.Edges.Costs);
@@ -202,9 +214,11 @@ title('TEST LP')
 highlight(h44,'Edges',[1:numedges(G0)],'EdgeColor','g','LineWidth',0.25);
 %%
 % select which path to highlight
-PATH_NO = 2;
-highlight(h44,'Edges',LP_path_mat(4,:),'EdgeColor','k','LineWidth',1.5)
+PATH_NO = 3;
+% highlight(h44,'Edges',LP_path_mat(4,:),'EdgeColor','k','LineWidth',1.5)
 % highlight(h44,'Edges',LP_path_mat(:,PATH_NO),'EdgeColor','k','LineWidth',1.5)
+% highlight(h44,'Edges',deb_edges2(:,1),'EdgeColor','k','LineWidth',1.5)
+highlight(h44,'Edges',21,'EdgeColor','k','LineWidth',1.5)
 title(['LP Cost ',num2str(PATH_NO), ': ', num2str(path_cost(PATH_NO))])
 
 %% DEBUG compare pahts from 2 solutions
