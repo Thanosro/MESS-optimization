@@ -9,9 +9,9 @@ rmpath('C:\Users\thano\OneDrive\Documents\USC\DeepSolar\OPF\cvx\lib\narginchk_')
 % graph with node split
 clc; clear all; close all;
 %m , d # of days
-mg = 4; days =7;
+mg = 4; days =5;
 % # of MESS
-MESS = 3;
+MESS = 2;
 if MESS > mg
        error('No of MESS > of Micro-grids')
 end
