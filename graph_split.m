@@ -9,9 +9,9 @@ rmpath('C:\Users\thano\OneDrive\Documents\USC\DeepSolar\OPF\cvx\lib\narginchk_')
 % graph with node split
 clc; clear all; close all;
 %m , d # of days
-mg = 4; days =5;
+mg = 7; days =30;
 % # of MESS
-MESS = 2;
+MESS = 5;
 if MESS > mg
        error('No of MESS > of Micro-grids')
 end
@@ -151,61 +151,53 @@ ind_ed_s = [st_nd end_nd];
 dis_S_T = distances(G0,numnodes(G0)-1,numnodes(G0),'Method','unweighted');
  % distance between day 1 and last day:
  dis_d1_dl = dis_S_T - 2;
-%  edges_id_mat = zeros(1,MESS);
- disp('******* LP min cost individual Paths ***********')
-for i_MESS = 1:(MESS-1)
-    disp(['+++++++++ Path #',num2str(i_MESS),'++++++++++++++'])
-% the next path is the st_ind row:
-% st_ind = find(ind_ed_s(:,1) == ind_ed_s(i_MESS,2));
-    st_ind = find(ind_ed_s(:,1) == ind_ed_s(1,2));
-    np = [0 0];
-%     np = ind_ed_s(st_ind,:)
-%     i_path = 0;
-    for i_path = 1:(dis_d1_dl-1)
-        np = ind_ed_s(st_ind,:);
-        % next node is: 
-        nex_nd = np(2);
-        % iterate
-        st_ind = find(ind_ed_s(:,1) == nex_nd);
-%         i_path = i_path + 1;
-        % path_mat(:,i_path) = np
-        path_mat(i_path,:) = np;
-    end
-    fin_path_mat = [ind_ed_s(1,:) ; path_mat];
-    % node ID's of the 1st path
-    node_ids = unique(fin_path_mat);
-    % end
-    % find edges with start & end nodes in path mat"
-    edges_id = findedge(G0,fin_path_mat(:,1),fin_path_mat(:,2));
-    path_cost(i_MESS) = sum(G0.Edges.Costs(edges_id)); 
-    %&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-    % each column of LP_path_mat is the edges index for each path 
-    LP_path_mat(:,i_MESS) = edges_id';
-    disp(['Cost of ',num2str(i_MESS),' path is: ',num2str(path_cost(i_MESS))])
-    % remove the node ID's from the original matrix and repeat
-    % compare the difference in the elements of each column individualy
-    dif_col1 = setdiff(ind_ed_s(:,1),fin_path_mat(:,1));
-    dif_col2 = setdiff(ind_ed_s(:,2),fin_path_mat(:,2));
-    dif_col = [dif_col1 dif_col2];
-    %dif col is the new ind_ed_s matrix
-   ind_ed_s = dif_col;
-%     [log_TF, del_ind] = ismember(fin_path_mat, ind_ed_s,'rows');
-%     ind_ed_s(del_ind) = [];
-end
-disp(['+++++++++ Path #',num2str(i_MESS+1),'++++++++++++++'])
-edges_id = findedge(G0,ind_ed_s(:,1),ind_ed_s(:,2));
-path_cost(i_MESS+1) = sum(G0.Edges.Costs(edges_id));
-LP_path_mat(:,i_MESS+1) = edges_id';
-disp(['Cost of ',num2str(i_MESS+1),' path is: ',num2str(path_cost(i_MESS+1))])
-disp(['Total cost is with LP: ',num2str(sum(path_cost))])
-disp(newline)
 %%
-clearvars ind_ed_s i_MESS st_ind np path_cost path_len path_mat nex_nd dif_col dif_col1 dif_col2 fin_path_mat i_path edges_id node_ids
-%% edge label from the debugging part & edge labels ffrom min cost flow LP
-% deb_edges = [reshape(LP_path_mat,[],1) G0.Edges.Costs(reshape(LP_path_mat,[],1)) G0.Edges.Labels(fl1>0) G0.Edges.Costs(fl1>0)]
-deb_edges2 = [sort(reshape(LP_path_mat,[],1)) G0.Edges.Costs(reshape(LP_path_mat,[],1)) G0.Edges.Labels(fl1>0) G0.Edges.Costs(fl1>0)]
-isequal(deb_edges2(:,1), deb_edges2(:,3))
-sum([deb_edges2(:,2) deb_edges2(:,4)])
+[st_nd, end_nd] = findedge(G0,find(fl1>0));
+ind_ed_p = [st_nd end_nd];
+COUNTER = 1;
+init_nodes = ind_ed_p(1:MESS,1);
+%% add the first edges of each path 
+for j_MESS = 1:MESS
+% end_nd_temp = ind_ed_p(COUNTER,2);
+end_nd_temp = ind_ed_p(1,2);
+% end_nd_temp = ind_ed_p(1,1);
+for i_path = 1:(dis_d1_dl-1)
+    node_array(i_path,COUNTER) = end_nd_temp;
+%     outedges(G0,end_nd_temp)
+    next_edge = fl(outedges(G0,end_nd_temp))'*outedges(G0,end_nd_temp);
+    next_edge_array(i_path,COUNTER) = next_edge;
+    % successors(G0,end_nd_temp)
+    [st_nd_temp, end_nd_temp] = findedge(G0,next_edge);
+%     node_mat(i_path,COUNTER) = end_nd_temp;
+    % next node is end_nd_temp
+    if days <= 7
+        disp(['Next node is: ',num2str(end_nd_temp)])
+    end
+end
+node_array(i_path+1,COUNTER) = end_nd_temp;
+next_edge_array_mat(:,j_MESS) = next_edge_array';
+node_array_mat(:,j_MESS) = node_array';
+%
+% find(ind_ed_p(:,1) == node_mat')
+% Give index if the element in "node_mat" is a member of "ind_ed_p(:,1)".
+[~, del_ind2] = ismember(node_array, ind_ed_p(:,2));
+% delete the path from the ind_ed_p matrix and repeat
+ind_ed_p(del_ind2,:) = [];
+% ind_ed_p(del_ind2(2:end),:) = [];
+end
+% node_array_mat(end+1,:) = ind_ed_p(:,2)
+% insert init nodes to the top of the node matrix
+node_array_mat(end+1,:) = init_nodes;
+node_array_mat = circshift(node_array_mat,1);
+% find the edges for the starting nodes
+init_edges = findedge(G0,node_array_mat(1,:),node_array_mat(2,:))';
+% append init edges to the top of next_edge_array_mat
+next_edge_array_mat(end+1,:) = init_edges;
+next_edge_array_mat = circshift(next_edge_array_mat,1);
+%%
+disp(['Cost of each path with LP is',newline, num2str(sum(G0.Edges.Costs(next_edge_array_mat)))])
+% sum(G0.Edges.Costs(next_edge_array_mat))
+disp(['Total Cost of  LP is',newline, num2str(sum(sum(G0.Edges.Costs(next_edge_array_mat))))])
 %% test plots 
 figure(1342)
 h44 =plot(G0);%,'EdgeLabel',G0.Edges.Costs);
@@ -314,31 +306,88 @@ dif_egd = [isinf(Gs.Edges.Weight) fl]
 [find(dif_egd(:,1) == 1) find(dif_egd(:,2) == 1)]
 
 
-%% test code
-for i_path = 1:MESS
-    mic_mat(i_path:MESS:size(mic_mat,1),:)
-end
-%%
-clc
-s_path = Gs.Edges.Labels(fl>0);
-[psOut,ptOut] = findedge(Gs,s_path);
-[psOut ptOut];
-for i_n_path = 1:length(psOut)
-    next_node_index = find(ptOut(i_n_path) == psOut(:,:))
-    [psOut(next_node_index) ptOut(next_node_index)] 
-    i_n_path = next_node_index;
-end
-%% test code edge label 
-Ed_lbls = reshape(G0.Edges.Labels,mg,[]);
-% add 1 column at start
-Ed_lbls = [zeros(mg,1) Ed_lbls(:,:)];
-Ed_lbls(:,1) = Ed_lbls(:,end);
-Ed_lbls(:,end) = [];
-Ed_lbls =  flipud(Ed_lbls);
-%% matrix with zeros same as Ed_lbls to show the paths
-Ind_G0 = zeros(size(Ed_lbls));
-% Ind_G0(fl>0) = 1;
-Ind_Gs = zeros(size(Ed_lbls));
+%% test codes
+    %%
+    %  edges_id_mat = zeros(1,MESS);
+     disp('******* LP min cost individual Paths ***********')
+    for i_MESS = 1:(MESS-1)
+        disp(['+++++++++ Path #',num2str(i_MESS),'++++++++++++++'])
+    % the next path is the st_ind row:
+    % st_ind = find(ind_ed_s(:,1) == ind_ed_s(i_MESS,2));
+        st_ind = find(ind_ed_s(:,1) == ind_ed_s(1,2));
+        np = [0 0];
+    %     np = ind_ed_s(st_ind,:)
+    %     i_path = 0;
+        for i_path = 1:(dis_d1_dl-1)
+            np = ind_ed_s(st_ind,:);
+            % next node is: 
+            nex_nd = np(2);
+            % iterate
+            st_ind = find(ind_ed_s(:,1) == nex_nd);
+    %         i_path = i_path + 1;
+            % path_mat(:,i_path) = np
+            path_mat(i_path,:) = np;
+        end
+        fin_path_mat = [ind_ed_s(1,:) ; path_mat];
+        % node ID's of the 1st path
+        node_ids = unique(fin_path_mat);
+        % end
+        % find edges with start & end nodes in path mat"
+        edges_id = findedge(G0,fin_path_mat(:,1),fin_path_mat(:,2));
+        path_cost(i_MESS) = sum(G0.Edges.Costs(edges_id)); 
+        %&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+        % each column of LP_path_mat is the edges index for each path 
+        LP_path_mat(:,i_MESS) = edges_id';
+        disp(['Cost of ',num2str(i_MESS),' path is: ',num2str(path_cost(i_MESS))])
+        % remove the node ID's from the original matrix and repeat
+        % compare the difference in the elements of each column individualy
+        dif_col1 = setdiff(ind_ed_s(:,1),fin_path_mat(:,1));
+        dif_col2 = setdiff(ind_ed_s(:,2),fin_path_mat(:,2));
+        dif_col = [dif_col1 dif_col2];
+        %dif col is the new ind_ed_s matrix
+       ind_ed_s = dif_col;
+    %     [log_TF, del_ind] = ismember(fin_path_mat, ind_ed_s,'rows');
+    %     ind_ed_s(del_ind) = [];
+    end
+    disp(['+++++++++ Path #',num2str(i_MESS+1),'++++++++++++++'])
+    edges_id = findedge(G0,ind_ed_s(:,1),ind_ed_s(:,2));
+    path_cost(i_MESS+1) = sum(G0.Edges.Costs(edges_id));
+    LP_path_mat(:,i_MESS+1) = edges_id';
+    disp(['Cost of ',num2str(i_MESS+1),' path is: ',num2str(path_cost(i_MESS+1))])
+    disp(['Total cost is with LP: ',num2str(sum(path_cost))])
+    disp(newline)
+    %%
+    clearvars ind_ed_s i_MESS st_ind np path_cost path_len path_mat nex_nd dif_col dif_col1 dif_col2 fin_path_mat i_path edges_id node_ids
+    %% edge label from the debugging part & edge labels ffrom min cost flow LP
+    % deb_edges = [reshape(LP_path_mat,[],1) G0.Edges.Costs(reshape(LP_path_mat,[],1)) G0.Edges.Labels(fl1>0) G0.Edges.Costs(fl1>0)]
+    deb_edges2 = [sort(reshape(LP_path_mat,[],1)) G0.Edges.Costs(reshape(LP_path_mat,[],1)) G0.Edges.Labels(fl1>0) G0.Edges.Costs(fl1>0)]
+    isequal(deb_edges2(:,1), deb_edges2(:,3))
+    sum([deb_edges2(:,2) deb_edges2(:,4)])
+    %%
+    for i_path = 1:MESS
+        mic_mat(i_path:MESS:size(mic_mat,1),:)
+    end
+    %%
+    clc
+    s_path = Gs.Edges.Labels(fl>0);
+    [psOut,ptOut] = findedge(Gs,s_path);
+    [psOut ptOut];
+    for i_n_path = 1:length(psOut)
+        next_node_index = find(ptOut(i_n_path) == psOut(:,:))
+        [psOut(next_node_index) ptOut(next_node_index)] 
+        i_n_path = next_node_index;
+    end
+    %% test code edge label 
+    Ed_lbls = reshape(G0.Edges.Labels,mg,[]);
+    % add 1 column at start
+    Ed_lbls = [zeros(mg,1) Ed_lbls(:,:)];
+    Ed_lbls(:,1) = Ed_lbls(:,end);
+    Ed_lbls(:,end) = [];
+    Ed_lbls =  flipud(Ed_lbls);
+    %% matrix with zeros same as Ed_lbls to show the paths
+    Ind_G0 = zeros(size(Ed_lbls));
+    % Ind_G0(fl>0) = 1;
+    Ind_Gs = zeros(size(Ed_lbls));
 
-%%
-highlight(h1,'Edges',68,'EdgeColor','r','LineWidth',1.5)
+    %%
+    highlight(h1,'Edges',68,'EdgeColor','r','LineWidth',1.5)
