@@ -9,9 +9,9 @@ rmpath('C:\Users\thano\OneDrive\Documents\USC\DeepSolar\OPF\cvx\lib\narginchk_')
 % graph with node split
 clc; clear all; close all;
 %m , d # of days
-mg = 7; days =30;
+mg = 4; days =7;
 % # of MESS
-MESS = 5;
+MESS = 2;
 if MESS > mg
        error('No of MESS > of Micro-grids')
 end
@@ -52,7 +52,7 @@ cost_v = G0.Edges.Costs';
 tic;
 cvx_begin quiet
 cvx_solver gurobi
-variable fl(numedges(G0),1)  %integer
+variable fl(numedges(G0),1)  integer
 % maximize sum(cost_v*fl)
 minimize cost_v*fl
 subject to 
@@ -196,27 +196,40 @@ next_edge_array_mat(end+1,:) = init_edges;
 next_edge_array_mat = circshift(next_edge_array_mat,1);
 %%
 disp(['Cost of each path with LP is',newline, num2str(sum(G0.Edges.Costs(next_edge_array_mat)))])
-% sum(G0.Edges.Costs(next_edge_array_mat))
+path_cost = sum(G0.Edges.Costs(next_edge_array_mat));
 disp(['Total Cost of  LP is',newline, num2str(sum(sum(G0.Edges.Costs(next_edge_array_mat))))])
 %% test plots 
 figure(1342)
 h44 =plot(G0);%,'EdgeLabel',G0.Edges.Costs);
 layout(h44,'layered','Direction','right','Sources', 'S*','Sinks','T*');
 title('TEST LP')
-highlight(h44,'Edges',[1:numedges(G0)],'EdgeColor','g','LineWidth',0.25);
+highlight(h44,'Edges',[1:numedges(G0)],'EdgeColor','w','LineWidth',0.25);
 %%
 % select which path to highlight
-PATH_NO = 3;
-% highlight(h44,'Edges',LP_path_mat(4,:),'EdgeColor','k','LineWidth',1.5)
-% highlight(h44,'Edges',LP_path_mat(:,PATH_NO),'EdgeColor','k','LineWidth',1.5)
-% highlight(h44,'Edges',deb_edges2(:,1),'EdgeColor','k','LineWidth',1.5)
-highlight(h44,'Edges',21,'EdgeColor','k','LineWidth',1.5)
+PATH_NO = 1;
+if PATH_NO > MESS
+    error('Path # > MESS')
+end
+highlight(h44,'Edges',next_edge_array_mat(:,PATH_NO),'EdgeColor','k','LineWidth',1.5)
 title(['LP Cost ',num2str(PATH_NO), ': ', num2str(path_cost(PATH_NO))])
+%%
+figure(1345)
+h44 =plot(G0);%,'EdgeLabel',G0.Edges.Costs);
+layout(h44,'layered','Direction','right','Sources', 'S*','Sinks','T*');
+title('TEST SP')
+highlight(h44,'Edges',[1:numedges(G0)],'EdgeColor','w','LineWidth',0.25);
+%%
+% select which path to highlight
 
+if PATH_NO > MESS
+    error('Path # > MESS')
+end
+highlight(h44,'Edges',Shortest_path_mat(:,PATH_NO),'EdgeColor','k','LineWidth',1.5)
+title(['SP Cost ',num2str(PATH_NO), ': ', num2str(suc_sh_pa(PATH_NO))])
 %% DEBUG compare pahts from 2 solutions
 % remove 1st and last row of Shortest path mat cuz it's the edges S* T*
 % if condition holds to run the code more than once
-if size(Shortest_path_mat,1) ~= size(LP_path_mat,1)
+if size(Shortest_path_mat,1) ~= size(next_edge_array_mat,1)
     Shortest_path_mat(1,:) = [];
     Shortest_path_mat(end,:) = [];
 end
@@ -225,85 +238,94 @@ end
 % edge indices of each path from Shortest paths is Shortest_path_mat
 % [LP_path_mat Shortest_path_mat]
 % cost of each edge of each path 
-disp('Cost of each edge of LP is:')
-disp(num2str(G0.Edges.Costs(LP_path_mat)))
-% G0.Edges.Costs(LP_path_mat)
-disp('Cost of each edge with Shortest Paths is:')
-disp(num2str(Gs.Edges.Costs(Shortest_path_mat)))
-% Gs.Edges.Costs(Shortest_path_mat)
-% cost of each path with each approach
-disp(['Cost of each path of LP is: ',newline,num2str(sum(G0.Edges.Costs(LP_path_mat)))])
-% sum(G0.Edges.Costs(LP_path_mat))
-disp(['Cost of each path with Shortest paths is:',newline,num2str(sum(Gs.Edges.Costs(Shortest_path_mat)))])
-% sum(Gs.Edges.Costs(Shortest_path_mat))
-disp('The increasing cost of each path with LP is:')
-disp(num2str(cumsum(G0.Edges.Costs(LP_path_mat))))
-% cumsum(G0.Edges.Costs(LP_path_mat))
-disp('The increasing cost of each path with Shortest Path is')
-disp(num2str(cumsum(Gs.Edges.Costs(Shortest_path_mat))))
-% cumsum(Gs.Edges.Costs(Shortest_path_mat))
-%% DEBUGGING plot the increasing cost 
+if days <= 7
+    disp('Cost of each edge of LP is:')
+    disp(num2str(G0.Edges.Costs(next_edge_array_mat)))
+    % G0.Edges.Costs(LP_path_mat)
+    disp('Cost of each edge with Shortest Paths is:')
+    disp(num2str(Gs.Edges.Costs(Shortest_path_mat)))
+    % Gs.Edges.Costs(Shortest_path_mat)
+    % cost of each path with each approach
+    disp(['Cost of each path of LP is: ',newline,num2str(sum(G0.Edges.Costs(next_edge_array_mat)))])
+    % sum(G0.Edges.Costs(LP_path_mat))
+    disp(['Cost of each path with Shortest paths is:',newline,num2str(sum(Gs.Edges.Costs(Shortest_path_mat)))])
+    % sum(Gs.Edges.Costs(Shortest_path_mat))
+    disp('The increasing cost of each path with LP is:')
+    disp(num2str(cumsum(G0.Edges.Costs(next_edge_array_mat))))
+    % cumsum(G0.Edges.Costs(LP_path_mat))
+    disp('The increasing cost of each path with Shortest Path is')
+    disp(num2str(cumsum(Gs.Edges.Costs(Shortest_path_mat))))
+    % cumsum(Gs.Edges.Costs(Shortest_path_mat))
+end
+%% DEBUGGING plot the increasing cost of each MESS during the days
 for i_plot = 1:MESS
     figure(46+i_plot)
-    plot([cumsum(Gs.Edges.Costs(Shortest_path_mat(:,i_plot))) cumsum(G0.Edges.Costs(LP_path_mat(:,i_plot))) ])
-    title(['Increasing cost of path # ',num2str(i_plot)])
-    xlabel('# of edges')
+    plot( [cumsum(Gs.Edges.Costs(Shortest_path_mat(:,i_plot))) cumsum(G0.Edges.Costs(next_edge_array_mat(:,i_plot))) ])
+    title(['Increasing cost of MESS # ',num2str(i_plot)])
+    xlabel('Days')
     ylabel('Cost')
-    legend('SP','LP')
+    xticks(1:2:2*days)
+    xticklabels(1:days)
+    legend('Greedy','LP','Location','northwest')
+    xlim([0 2*days])
 end
 figure(100)
-plot([sum([cumsum(G0.Edges.Costs(LP_path_mat))],2) sum(cumsum(Gs.Edges.Costs(Shortest_path_mat)),2)])
+plot([sum([cumsum(G0.Edges.Costs(next_edge_array_mat))],2) sum(cumsum(Gs.Edges.Costs(Shortest_path_mat)),2)])
 title('Comparison increasing path cost')
-xlabel('# of edges')
+xlabel('Days')
 ylabel('Cost')
-legend('LP','SP')
-%% DEGUBBING FIND FROM EACH NODE NEXT AVAILABLE NODES & EDGES' COSTS
-% LP %
-ind_ed2(:,1); % shows nodes in each path chosen by LP
-for i_nx_nd = 1:MESS:size(ind_ed2,1)
-    in_av_edges = outedges(G0,ind_ed2(i_nx_nd,1));
-    disp('Index of available edges is:')
-    disp(num2str(in_av_edges))
-    cost_avail_edges = G0.Edges.Costs(outedges(G0,ind_ed2(i_nx_nd,1)));
-    disp('Cost of available edges is: ')
-    disp(num2str(cost_avail_edges))
-    
-    % print which edge the algorithm chose:
-    % the index shows all the available edges, 1 of which has flow
-    % using the index of available edges in_av_edges we can check which of
-    % the edges has flow:
-%     [in_av_edges fl(in_av_edges)]
-    chosen_edge = in_av_edges'*fl(in_av_edges);
-    disp(['LP chose edge # ',num2str(chosen_edge),' with cost ',num2str(G0.Edges.Costs(chosen_edge))])
-    disp('-----------Next Edge-------------')
-end
-% G0.Edges.Costs(outedges(G0,ind_ed(i_nx_nd,1)))
-%% plot each path with green in new figure
-figure(3)
-h3 = plot(Gs);%,'EdgeLabel',Gs.Edges.Weight);
-layout(h3,'layered','Direction','right','Sources','S*','Sinks','T*')
-highlight(h3,'Edges',edges_id,'EdgeColor','g','LineWidth',1.5)
-title('Plot ind. paths')
-%% extract sub-graph from G0 graph with the shortest paths 
-% ind_ed_s =  ed_mat1(fl>0,:);
-% H0 = subgraph(G0,unique(ind_ed_s));
-H0 = subgraph(G0,unique(path_mat));
-H0 = addnode(H0,{'S*'});
-% H0 = addnode(H0,{'T*'});
-figure(443)
-h55 =plot(H0,'EdgeLabel',H0.Edges.Costs);
-layout(h55,'layered','Direction','right','Sources', 'S*','Sinks','T*')
-[diff_paths test_car]= conncomp(H0,'Type','weak')
-%% DEBUG check for different edges
-% test the different edges in the 2 approaches
-% edges in shortest paths: isinf(Gs.Edges.Weight)
-% edges in in LP min-cost flow: fl
-dif_egd = [isinf(Gs.Edges.Weight) fl]
-% compare between the 2 columns and return the index of the differences
-(dif_egd(:,1) == dif_egd(:,2)) == 0
-(dif_egd(:,1) == 1) == (dif_egd(:,2) == 1)
+xticks(1:2:2*days)
+xticklabels(1:days)
+xlim([0 2*days])
+legend('LP','Greedy','Location','northwest')
+%% ~~~~~~~~~~~~~~~~~~~ TEST CODES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    %% DEGUBBING FIND FROM EACH NODE NEXT AVAILABLE NODES & EDGES' COSTS
+    % LP %
+    ind_ed2(:,1); % shows nodes in each path chosen by LP
+    for i_nx_nd = 1:MESS:size(ind_ed2,1)
+        in_av_edges = outedges(G0,ind_ed2(i_nx_nd,1));
+        disp('Index of available edges is:')
+        disp(num2str(in_av_edges))
+        cost_avail_edges = G0.Edges.Costs(outedges(G0,ind_ed2(i_nx_nd,1)));
+        disp('Cost of available edges is: ')
+        disp(num2str(cost_avail_edges))
 
-[find(dif_egd(:,1) == 1) find(dif_egd(:,2) == 1)]
+        % print which edge the algorithm chose:
+        % the index shows all the available edges, 1 of which has flow
+        % using the index of available edges in_av_edges we can check which of
+        % the edges has flow:
+    %     [in_av_edges fl(in_av_edges)]
+        chosen_edge = in_av_edges'*fl(in_av_edges);
+        disp(['LP chose edge # ',num2str(chosen_edge),' with cost ',num2str(G0.Edges.Costs(chosen_edge))])
+        disp('-----------Next Edge-------------')
+    end
+    % G0.Edges.Costs(outedges(G0,ind_ed(i_nx_nd,1)))
+    %% plot each path with green in new figure
+    figure(3)
+    h3 = plot(Gs);%,'EdgeLabel',Gs.Edges.Weight);
+    layout(h3,'layered','Direction','right','Sources','S*','Sinks','T*')
+    highlight(h3,'Edges',edges_id,'EdgeColor','g','LineWidth',1.5)
+    title('Plot ind. paths')
+    %% extract sub-graph from G0 graph with the shortest paths 
+    % ind_ed_s =  ed_mat1(fl>0,:);
+    % H0 = subgraph(G0,unique(ind_ed_s));
+    H0 = subgraph(G0,unique(path_mat));
+    H0 = addnode(H0,{'S*'});
+    % H0 = addnode(H0,{'T*'});
+    figure(443)
+    h55 =plot(H0,'EdgeLabel',H0.Edges.Costs);
+    layout(h55,'layered','Direction','right','Sources', 'S*','Sinks','T*')
+    [diff_paths test_car]= conncomp(H0,'Type','weak')
+    %% DEBUG check for different edges
+    % test the different edges in the 2 approaches
+    % edges in shortest paths: isinf(Gs.Edges.Weight)
+    % edges in in LP min-cost flow: fl
+    dif_egd = [isinf(Gs.Edges.Weight) fl]
+    % compare between the 2 columns and return the index of the differences
+    (dif_egd(:,1) == dif_egd(:,2)) == 0
+    (dif_egd(:,1) == 1) == (dif_egd(:,2) == 1)
+
+    [find(dif_egd(:,1) == 1) find(dif_egd(:,2) == 1)]
 
 
 %% test codes
