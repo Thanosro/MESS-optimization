@@ -28,13 +28,25 @@ highlight(h55,'Edges',dly_op_cost_ind(:,day_no),'EdgeColor','r','LineWidth',1.5)
 reloc_edges = hglht_edges;
 reloc_edges(:,(1:(mg+1):size(hglht_edges,2))) = []
 % highlight(h55,'Edges',reloc_edges,'EdgeColor','r','LineWidth',1.5)
+%%
 highlight(h55,'Edges', reloc_edges(:,4),'Edgecolor','r')
 %%
 % relocation cost is 0: MESS stays on same micro-grid
 highlight(h55,'Edges', (mg+1):(mg+1):max(max(reloc_edges)),'Edgecolor','r')
 %%
-highlight(h55,'Edges', [6 9 11 14 16 19],'Edgecolor','r')
+highlight(h55,'Edges', edge_hlt_tst,'Edgecolor','r')
 %%
-dis_counter = 1;
-diag(reloc_edges,-1)
+diag_counter = 1;
+day_counter = 5;
+% day_counter = max(max(reloc_edges)) - diag_counter;
+[diag(reloc_edges(:,1:mg),-diag_counter) ; diag(reloc_edges(:,1:mg),diag_counter)]
+dist_mat = [diag(reloc_edges(:,1:mg),-diag_counter) ; diag(reloc_edges(:,1:mg),diag_counter)]+(0:day_counter)*mg*(mg+1)
+edge_hlt_tst = reshape(dist_mat,1,[])
 % 5+dis_counter*mg
+%% naming the nodes to v_11 
+rsh_nd_mat  = reshape((1:numnodes(G0)-2),mg,[]);
+[I_ndnm,J_ndnm] = find(rsh_nd_mat>0);
+str_array = [num2str(round(I_ndnm)) num2str(round(J_ndnm/2))];
+num_array = str2num(str_array);
+num_mat = reshape(num_array,mg,[]);
+num_str = string(num_mat)
