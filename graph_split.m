@@ -9,7 +9,7 @@ rmpath('C:\Users\thano\OneDrive\Documents\USC\DeepSolar\OPF\cvx\lib\narginchk_')
 % graph with node split
 clc; clear all; close all;
 %m , d # of days
-mg = 4; days =7;
+mg = 3; days =4;
 % # of MESS
 MESS = 2;
 if MESS > mg
@@ -17,7 +17,17 @@ if MESS > mg
 end
 % eye(mg) is the diagonal with the cost difference with & w/o MESS
 % ones is the matrix denoting the tranfer cost from microgrid i to j
-A0 = [eye(mg) zeros(mg);zeros(mg) ones(mg)];
+% create the relocation cost matrix
+reloc_mat = tril(ones(mg));
+for dist = 1:mg
+if dist > mg
+    error('dist > mg')
+end
+reloc_mat(dist:mg+1:end) = dist;
+end
+reloc_mat = tril(reloc_mat);
+reloc_mat = reloc_mat+triu(reloc_mat',1);
+A0 = [eye(mg) zeros(mg);zeros(mg) reloc_mat];
 AD0 = kron(eye(days-1),A0);
 % spy(AD0)
 AD1 = blkdiag(AD0,eye(mg));
@@ -35,13 +45,23 @@ G0 = addedge(G0,Ed_T0);
 %% add edges costs and capacities 
 % edge capacities are 1 except those of S* and T* with capacity equal to
 % the # of MESS
-G0.Edges.Capacities = [ones(init_edges,1); MESS*ones(length((init_edges+1):numedges(G0)),1) ];
-% edges have random cost; edges from S* and T* have zero costs
-G0.Edges.Costs = [ randi(4,init_edges,1) ; zeros(length((init_edges+1):numedges(G0)),1)];
-% G0.Edges.Costs = [ 4*rand(init_edges,1) ; zeros(length((init_edges+1):numedges(G0)),1)];
-G0.Edges.Weight = G0.Edges.Costs;
 % assign label nodes
 G0.Edges.Labels = (1:numedges(G0))';
+G0.Edges.Capacities = [ones(init_edges,1); MESS*ones(length((init_edges+1):numedges(G0)),1) ];
+% edges have random cost; edges from S* and T* have zero costs
+% G0.Edges.Costs = [ randi(4,init_edges,1) ; zeros(length((init_edges+1):numedges(G0)),1)];
+% G0.Edges.Costs = [ 4*rand(init_edges,1) ; zeros(length((init_edges+1):numedges(G0)),1)];
+G0.Edges.Costs = G0.Edges.Weight;
+G0.Edges.Costs((numedges(G0)-2*mg+1):numedges(G0)) = 0;
+% ----------------------------
+hglht_edges = reshape(G0.Edges.Labels,mg,[]);
+hglht_edges(:,(end-1:end)) =[];
+% each column is the index daily cost of the matrix
+dly_op_cost_ind = hglht_edges(:,(1:(mg+1):size(hglht_edges,2)));
+dly_op_cost_ind = reshape(dly_op_cost_ind,[],1);
+G0.Edges.Costs(dly_op_cost_ind) = d_cost_red;
+% ----------------------------
+G0.Edges.Weight = G0.Edges.Costs;
 figure(1)
 h1 =plot(G0,'EdgeLabel',G0.Edges.Costs);
 layout(h1,'layered','Direction','right','Sources', 'S*','Sinks','T*')
@@ -206,7 +226,7 @@ title('TEST LP')
 highlight(h44,'Edges',[1:numedges(G0)],'EdgeColor','w','LineWidth',0.25);
 %%
 % select which path to highlight
-PATH_NO = 1;
+PATH_NO = 2;
 if PATH_NO > MESS
     error('Path # > MESS')
 end
