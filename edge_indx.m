@@ -17,13 +17,14 @@ title('LP indices')
 hglht_edges = reshape(G0.Edges.Labels,mg,[]);
 hglht_edges(:,(end-1:end)) =[];
 % each column is the index daily cost of the matrix
-dly_op_cost_ind = hglht_edges(:,(1:(mg+1):size(hglht_edges,2)))
+dly_op_cost_ind = hglht_edges(:,(1:(mg+1):size(hglht_edges,2)));
+dly_op_cost_ind = reshape(dly_op_cost_ind,[],1)
 %%
 day_no = 3 % index of each day 
 disp(['The cost of each micro-grid in day ',num2str(day_no),' is:'])
 G0.Edges.Costs(dly_op_cost_ind(:,day_no))
 %%
-highlight(h55,'Edges',dly_op_cost_ind(:,day_no),'EdgeColor','r','LineWidth',1.5)
+highlight(h55,'Edges',dly_op_cost_ind,'EdgeColor','r','LineWidth',1.5)
 %%
 reloc_edges = hglht_edges;
 reloc_edges(:,(1:(mg+1):size(hglht_edges,2))) = []
