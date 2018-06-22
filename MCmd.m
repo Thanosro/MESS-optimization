@@ -15,7 +15,7 @@ function [min_cost_S, s_t_mat_3d, x_3d] = MCmd(Load_dem,No_gen_units,Op_States,T
     % constraint with storage
     % constraint without storage
     d = 0;
-    s_cap = 5;
+    s_cap = 25;
 %     Cost_vec = a.*Supply_vec;
 % No_gen_units = Ns
 % Time_slots = T

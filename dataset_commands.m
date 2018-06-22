@@ -12,12 +12,23 @@ L_t_ar = L_t_str.L_t_ar;
 cl_num = 40;
 plot(L_t_ar(96*cl_num:96*(cl_num+1)-1))
 %%
-for i_plot = 1:10
+% for i_plot = 1:10
    cl_num = randi(10000);
    96*cl_num;
    figure(131)
-   plot(L_t_ar(96*cl_num:96*(cl_num+1)-1))
+   plot(25*L_t_ar(96*cl_num:96*(cl_num+1)-1))
    hold on;
-end
+   set(gca, 'yGrid','on')
+%    title('Micro-grid daily consumption')
+   ylabel('Consumption (kW)')
+   xlim([0 96])
+   xticks(0:12:96)
+   xticklabels(0:3:24)
+   xlabel('Time (hours)')
+%    xticklabels({'','Febrary','March'})
+%    xtickformat('H')
+% end
 %%
 close all;
+%%
+mean(L_t_ar)

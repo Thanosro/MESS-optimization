@@ -9,16 +9,17 @@ rmpath('C:\Users\thano\OneDrive\Documents\USC\DeepSolar\OPF\cvx\lib\narginchk_')
 % graph with node split
 clc; clear all; close all;
 %m , d # of days
-mg = 3; days =4;
+mg = 4; days =7;
 % # of MESS
-MESS = 2;
+MESS = 4;
 if MESS > mg
        error('No of MESS > of Micro-grids')
 end
 % eye(mg) is the diagonal with the cost difference with & w/o MESS
 % ones is the matrix denoting the tranfer cost from microgrid i to j
 % create the relocation cost matrix
-reloc_mat = tril(ones(mg));
+base_reloc_cost = 5;
+reloc_mat =tril(ones(mg));
 for dist = 1:mg
 if dist > mg
     error('dist > mg')
@@ -26,7 +27,7 @@ end
 reloc_mat(dist:mg+1:end) = dist;
 end
 reloc_mat = tril(reloc_mat);
-reloc_mat = reloc_mat+triu(reloc_mat',1);
+reloc_mat =  base_reloc_cost*(reloc_mat+triu(reloc_mat',1));
 A0 = [eye(mg) zeros(mg);zeros(mg) reloc_mat];
 AD0 = kron(eye(days-1),A0);
 % spy(AD0)
@@ -61,6 +62,8 @@ dly_op_cost_ind = hglht_edges(:,(1:(mg+1):size(hglht_edges,2)));
 dly_op_cost_ind = reshape(dly_op_cost_ind,[],1);
 G0.Edges.Costs(dly_op_cost_ind) = d_cost_red;
 % ----------------------------
+G0.Edges.Costs(G0.Edges.Weight == base_reloc_cost) = 0;
+%-----------------------------
 G0.Edges.Weight = G0.Edges.Costs;
 figure(1)
 h1 =plot(G0,'EdgeLabel',G0.Edges.Costs);
@@ -190,9 +193,9 @@ for i_path = 1:(dis_d1_dl-1)
     [st_nd_temp, end_nd_temp] = findedge(G0,next_edge);
 %     node_mat(i_path,COUNTER) = end_nd_temp;
     % next node is end_nd_temp
-    if days <= 7
-        disp(['Next node is: ',num2str(end_nd_temp)])
-    end
+%     if days <= 7
+%         disp(['Next node is: ',num2str(end_nd_temp)])
+%     end
 end
 node_array(i_path+1,COUNTER) = end_nd_temp;
 next_edge_array_mat(:,j_MESS) = next_edge_array';
