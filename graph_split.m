@@ -1,7 +1,7 @@
 addpath(genpath('C:\Users\Thanos\Documents\DeepSolar'))
 cd C:\Users\Thanos\Documents\DeepSolar\Systech\sims\MESS-optimization
 rmpath('C:\Users\Thanos\Documents\DeepSolar\Optimal_flow\cvx\lib\narginchk_')
-%%
+%% Laptop
 addpath(genpath('C:\Users\thano\OneDrive\Documents\USC'))
 cd C:\Users\thano\OneDrive\Documents\USC\DeepSolar\sustech\MESS-optimization-master\MESS-optimization
 rmpath('C:\Users\thano\OneDrive\Documents\USC\DeepSolar\OPF\cvx\lib\narginchk_')
@@ -9,9 +9,9 @@ rmpath('C:\Users\thano\OneDrive\Documents\USC\DeepSolar\OPF\cvx\lib\narginchk_')
 % graph with node split
 clc; clear all; close all;
 %m , d # of days
-mg = 4; days =7;
+mg = 5; days =7;
 % # of MESS
-MESS = 4;
+MESS = 2;
 if MESS > mg
        error('No of MESS > of Micro-grids')
 end
@@ -67,8 +67,10 @@ G0.Edges.Costs(G0.Edges.Weight == base_reloc_cost) = 0;
 G0.Edges.Weight = G0.Edges.Costs;
 figure(1)
 h1 =plot(G0,'EdgeLabel',G0.Edges.Costs);
+% h1 =plot(G0);
 layout(h1,'layered','Direction','right','Sources', 'S*','Sinks','T*')
 title('Min cost flow LP')
+labelnode(h1,[1:numnodes(G0)-2],'')
 % highlight(h3,'Edges',,'EdgeColor','r')
 %%
 cost_v = G0.Edges.Costs';
@@ -87,6 +89,7 @@ toc;
 disp(['Total cost with LP: ',num2str(cost_v*fl)])
 %%
 highlight(h1,'Edges',find(fl>0),'EdgeColor','r','LineWidth',1.5)
+
 %% find path of nodes 
 % find start and end nodes of edges with flow
 [st_ed,end_ed] = findedge(G0);
@@ -130,7 +133,9 @@ isequal(Gs.Edges.Weight,G0.Edges.Costs)
 Gs = G0;
 suc_sh_pa = zeros(1,MESS);
 figure(2)
-h2 = plot(Gs,'EdgeLabel',Gs.Edges.Weight);
+% h2 = plot(Gs,'EdgeLabel',Gs.Edges.Weight);
+h2 = plot(Gs);
+labelnode(h2,[1:numnodes(Gs)-2],'')
 layout(h2,'layered','Direction','right','Sources','S*','Sinks','T*')
 title('Shortest Paths')
 disp('******* Shortest Paths Costs ***********')
@@ -237,17 +242,17 @@ highlight(h44,'Edges',next_edge_array_mat(:,PATH_NO),'EdgeColor','k','LineWidth'
 title(['LP Cost ',num2str(PATH_NO), ': ', num2str(path_cost(PATH_NO))])
 %%
 figure(1345)
-h44 =plot(G0);%,'EdgeLabel',G0.Edges.Costs);
-layout(h44,'layered','Direction','right','Sources', 'S*','Sinks','T*');
+h45 =plot(G0);%,'EdgeLabel',G0.Edges.Costs);
+layout(h45,'layered','Direction','right','Sources', 'S*','Sinks','T*');
 title('TEST SP')
-highlight(h44,'Edges',[1:numedges(G0)],'EdgeColor','w','LineWidth',0.25);
+highlight(h45,'Edges',[1:numedges(G0)],'EdgeColor','w','LineWidth',0.25);
 %%
 % select which path to highlight
 
 if PATH_NO > MESS
     error('Path # > MESS')
 end
-highlight(h44,'Edges',Shortest_path_mat(:,PATH_NO),'EdgeColor','k','LineWidth',1.5)
+highlight(h45,'Edges',Shortest_path_mat(:,PATH_NO),'EdgeColor','k','LineWidth',1.5)
 title(['SP Cost ',num2str(PATH_NO), ': ', num2str(suc_sh_pa(PATH_NO))])
 %% DEBUG compare pahts from 2 solutions
 % remove 1st and last row of Shortest path mat cuz it's the edges S* T*
