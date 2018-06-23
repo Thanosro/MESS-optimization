@@ -11,7 +11,7 @@ clc; clear all; close all;
 %m , d # of days
 mg = 5; days =7;
 % # of MESS
-MESS = 2;
+MESS = 4;
 if MESS > mg
        error('No of MESS > of Micro-grids')
 end
@@ -66,8 +66,8 @@ G0.Edges.Costs(G0.Edges.Weight == base_reloc_cost) = 0;
 %-----------------------------
 G0.Edges.Weight = G0.Edges.Costs;
 figure(1)
-h1 =plot(G0,'EdgeLabel',G0.Edges.Costs);
-% h1 =plot(G0);
+% h1 =plot(G0,'EdgeLabel',G0.Edges.Costs);
+h1 =plot(G0);
 layout(h1,'layered','Direction','right','Sources', 'S*','Sinks','T*')
 title('Min cost flow LP')
 labelnode(h1,[1:numnodes(G0)-2],'')
@@ -77,7 +77,7 @@ cost_v = G0.Edges.Costs';
 tic;
 cvx_begin quiet
 cvx_solver gurobi
-variable fl(numedges(G0),1)  integer
+variable fl(numedges(G0),1)  %integer
 % maximize sum(cost_v*fl)
 minimize cost_v*fl
 subject to 
