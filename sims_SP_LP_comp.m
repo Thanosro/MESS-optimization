@@ -1,13 +1,41 @@
-for i_SP_LP = 1:1000
+for i_SP_LP = 1:10%50
     disp(['------------------sim ',num2str(i_SP_LP),'--------------'])
     run LP_SP_comp.m
     LP_path_cost(i_SP_LP,:) = [path_cost sum(sum(G0.Edges.Costs(next_edge_array_mat)))] ;
     SP_path_cost(i_SP_LP,:) = [suc_sh_pa sum(suc_sh_pa)];
+    base_cost_mat(i_SP_LP) = Base_cost;
 end
 %%
-load 30_sims.mat
+% load 30_sims.mat
 %%
-for PATH_NUMBER = 1:MESS+1
+figure(500)
+PATH_NUMBER = 4;
+% subplot(2,2,PATH_NUMBER)
+plot([LP_path_cost(:,PATH_NUMBER)+base_cost_mat' SP_path_cost(:,PATH_NUMBER)+base_cost_mat' base_cost_mat'])
+xlabel(['No. of Simulations'])%,newline,'(',num2str(PATH_NUMBER),')'])
+ylabel('Cost ($)')
+if PATH_NUMBER == MESS+1
+    title('Total Cost')
+else
+title(['MESS # ',num2str(PATH_NUMBER)])
+end
+legend('LP','Greedy','Location','northwest')
+%%
+figure(501)
+PATH_NUMBER = 4;
+% subplot(2,2,PATH_NUMBER)
+plot([LP_path_cost(:,PATH_NUMBER)-SP_path_cost(:,PATH_NUMBER)])
+xlabel(['No. of Simulations'])%,newline,'(',num2str(PATH_NUMBER),')'])
+ylabel('Cost ($)')
+if PATH_NUMBER == MESS+1
+    title('Total Cost')
+else
+title(['MESS # ',num2str(PATH_NUMBER)])
+end
+legend('LP','Greedy','Location','northwest')
+
+%%
+% for PATH_NUMBER = 1:MESS+1
     figure(445)
     subplot(2,2,PATH_NUMBER)
     plot([LP_path_cost(:,PATH_NUMBER) SP_path_cost(:,PATH_NUMBER)])
@@ -19,7 +47,7 @@ for PATH_NUMBER = 1:MESS+1
     title(['MESS # ',num2str(PATH_NUMBER)])
     end
     legend('LP','Greedy','Location','northwest')
-end
+% end
 %%
 
 figure(1344)

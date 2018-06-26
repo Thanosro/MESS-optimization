@@ -8,6 +8,8 @@ cd C:\Users\Thanos\Documents\DeepSolar\Systech\sims\MESS-optimization
 L_t_str = load('Pecan_load.mat');
 % convert to array 
 L_t_ar = L_t_str.L_t_ar;
+%%
+L_t_ar(find(isnan(L_t_ar) == 1)) = [];
 %% plot clusters of 96 data poits (1 day)
 cl_num = 40;
 plot(L_t_ar(96*cl_num:96*(cl_num+1)-1))
