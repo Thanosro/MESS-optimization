@@ -8,13 +8,13 @@
 %%
 % graph with node split
 % clc; clear all;
-clc;
-clearvars -except i_SP_LP LP_path_cost SP_path_cost
+% clc;
+% clearvars -except i_SP_LP LP_path_cost SP_path_cost MESS mg base_cost_mat
 close all;
 %m , d # of days
-mg = 5; days =7;
+mg = 4; days =4;
 % # of MESS
-MESS = 3;
+MESS = 2;
 if MESS > mg
        error('No of MESS > of Micro-grids')
 end
@@ -72,8 +72,8 @@ tic
 i_mcs = 1;
 while i_mcs <=  mg*days
     disp(num2str(i_mcs))
-cl_num = randi(9000);
-L_t_96 = 25*L_t_ar(96*cl_num:96*(cl_num+1)-1);
+cl_num = randi(5000);
+L_t_96 =  25*L_t_ar(96*cl_num:96*(cl_num+1)-1);
 if any(isnan(L_t_96))>0
     cl_num = randi(9000);
     L_t_96 = 25*L_t_ar(96*cl_num:96*(cl_num+1)-1);
@@ -98,8 +98,9 @@ tim = toc
 disp('done')
 min_cost_out;
 % cost of nodes
-%
-d_cost_red = diff(min_cost_out,1,2);
+disp(['Base operational cost without MESS is: ',num2str(sum(min_cost_out(:,2)))])
+Base_cost =  sum(min_cost_out(:,2));
+d_cost_red = -diff(min_cost_out,1,2);
 %% add edges costs and capacities 
 % edge capacities are 1 except those of S* and T* with capacity equal to
 % the # of MESS
@@ -143,9 +144,10 @@ subject to
 cvx_end
 toc;
 [fl cost_v'];
-disp(['Total cost with LP: ',num2str(cost_v*fl)])
+disp(['Total cost reduction with LP: ',num2str(cost_v*fl)])
+disp(['Total cost   with LP: ',num2str(cost_v*fl+Base_cost)])
 %%
-highlight(h1,'Edges',find(fl>0),'EdgeColor','r','LineWidth',1.5)
+highlight(h1,'Edges',find( fl>0),'EdgeColor','r','LineWidth',1.5)
 
 %% find path of nodes 
 % find start and end nodes of edges with flow
@@ -195,7 +197,8 @@ for i_rm = 1:MESS
     Shortest_path_mat(:,i_rm) = path1;
 end
 suc_sh_pa;
-disp(['Total cost with shortest paths is  ',num2str(sum(suc_sh_pa))])
+disp(['Total cost reduction with shortest paths is  ',num2str(sum(suc_sh_pa))])
+disp(['Total cost  with shortest paths is  ',num2str(sum(suc_sh_pa)+Base_cost)])
 disp(newline)
 %% DEBUGGING check if the paths are the same (LP & shortest paths)
 disp('**************** Debug Section ************')
