@@ -1,4 +1,6 @@
 % clc; clear all;
+% MCS data:
+dis_rate = 150; stor_cap = 600; a_price = 0.65; p_price = 0.05;
 % load the array 
 % loads as struct
 L_t_str = load('Pecan_load.mat');
@@ -21,15 +23,17 @@ gamma_1d = linspace(0,MAX_GEN,O); % distinct energy gen. values (0 25 50 100)
 % gamma_2d = repmat(gamma_1d,Ns,1); % number of generators arrays
 gamma_3d = repmat(gamma_1d,Ns,1,T-1); % Time slots arrays
 %%
+mg = 100; days = 10;
+%%
 tic
 % for i_mcs = 1:mg*days
 i_mcs = 1;
 while i_mcs <=  mg*days
     disp(num2str(i_mcs))
-cl_num = randi(9000);
+cl_num = randi(5000);
 L_t_96 = 25*L_t_ar(96*cl_num:96*(cl_num+1)-1);
 if any(isnan(L_t_96))>0
-    cl_num = randi(9000);
+    cl_num = randi(5000);
     L_t_96 = 25*L_t_ar(96*cl_num:96*(cl_num+1)-1);
     disp('Nan')
 end
@@ -53,7 +57,8 @@ disp('done')
 min_cost_out;
 % cost of nodes
 %
-d_cost_red = diff(min_cost_out,1,2);
+d_cost_red = -diff(min_cost_out,1,2);
+save 100_mg_10_days_MOND.mat
 % reshape(d_cost_red,mg,[])
 % d_cost_red = reshape(dly_op_cost_ind,[],1);
 %%
