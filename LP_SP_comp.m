@@ -12,7 +12,7 @@
 % clearvars -except i_SP_LP LP_path_cost SP_path_cost MESS mg base_cost_mat
 close all;
 %m , d # of days
-mg = 4; days =4;
+mg = 100; days =10;
 % # of MESS
 MESS = 2;
 if MESS > mg
