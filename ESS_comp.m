@@ -11,10 +11,11 @@
 % clc;
 clearvars -except MESS LP_cost ESS_cost_mat mg days
 close all;
+% load 100_mg_10d_Kwh.mat
 %m , d # of days
 % mg = 100; days =10;
 % # of MESS
-% % % MESS = 4;
+% MESS = 4;
 if MESS > mg
        error('No of MESS > of Micro-grids')
 end
@@ -48,9 +49,9 @@ G0 = addedge(G0,Ed_S0);
 G0 = addedge(G0,Ed_T0);
 %%
 % load 100_mg_10_days_MOND.mat
-load 100_mg_10_d.mat
+load 100_mg_10d_Kwh.mat
 %%
-d_cost_red = -d_cost_red;
+% d_cost_red = -d_cost_red;
 %% add edges costs and capacities 
 % edge capacities are 1 except those of S* and T* with capacity equal to
 % the # of MESS

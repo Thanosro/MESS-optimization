@@ -1,4 +1,3 @@
-%% FIGURE 8 MESS-ESS/MESS
 mg = 100; days =10;
 for MESS = 1:mg
     disp(['------------------sim ',num2str(MESS),'--------------'])
@@ -51,17 +50,15 @@ ylabel('Gain Difference ($)')
 grid on
 %%
 figure(11443434)
-plot(100*[abs(LP_cost)-abs(ESS_cost_mat)]./abs(ESS_cost_mat))
-xlabel('No of MESS')
-% title('(MESS-ESS)/ESS')
-ylabel('Gain Percentage')
-ax = gca;
-ax.YGrid = 'on';
-ylim([0 35])
-% percentage of improvement in benefit using MESS vs ESS decreases 
+plot([abs(LP_cost)-abs(ESS_cost_mat)]./abs(ESS_cost_mat))
+xlabel(['No of MESS',newline,'(b)'])
+title('(MESS-ESS)/ESS')
+% ylabel('Gain Difference ($)')
+grid on
+% percentage of improvement in benefit using MESS vs ES
 %%
 [max_Gain,max_ind] = max([abs(LP_cost)-abs(ESS_cost_mat)])
 %%
-print -depsc2 Fig_8_MESS_ESS.eps
+print -depsc2 Fig_7_MESS_ESS.eps
 %%
 save ESS_MESS_results_25.mat mg days max_Gain max_ind ESS_cost_mat LP_cost a_price p_price
