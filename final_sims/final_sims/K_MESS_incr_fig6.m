@@ -1,3 +1,10 @@
+addpath(genpath('C:\Users\Thanos\Documents\DeepSolar'))
+cd C:\Users\Thanos\Documents\DeepSolar\Systech\sims\MESS-optimization
+rmpath('C:\Users\Thanos\Documents\DeepSolar\Optimal_flow\cvx\lib\narginchk_')
+%% Laptop
+addpath(genpath('C:\Users\thano\OneDrive\Documents\USC'))
+cd C:\Users\thano\OneDrive\Documents\USC\DeepSolar\sustech\MESS-optimization-master\MESS-optimization
+rmpath('C:\Users\thano\OneDrive\Documents\USC\DeepSolar\OPF\cvx\lib\narginchk_')
 %%
 % graph with node split
 % clc; clear all;

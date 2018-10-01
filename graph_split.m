@@ -11,7 +11,7 @@ clc; clear all; close all;
 %m , d # of days
 mg = 5; days =7;
 % # of MESS
-MESS = 4;
+MESS = 2;
 if MESS > mg
        error('No of MESS > of Micro-grids')
 end

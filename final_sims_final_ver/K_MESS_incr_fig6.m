@@ -7,7 +7,7 @@ mg = 100; days =10;
 load 100_mg_10d_Kwh.mat
 %%
 close all;
-reloc_factor = 1;
+reloc_factor = 2;
 disp(['Cost without MESS is :',num2str(sum(min_cost_out(:,2)))])
 % sum(min_cost_out(:,2))
 disp(['Cost with MESS in every micro-grid is:',num2str(sum(min_cost_out(:,1)))])
@@ -119,7 +119,7 @@ cost_red_mat_SP(MESS) = sum(suc_sh_pa);
 clearvars -except cost_red_mat_SP MESS cost_red_mat_LP mg days d_cost_red reloc_factor
 end
 %%
-% save K_incr_ST_6_KwH_rlfc_2.mat
+save K_incr_ST_6_KwH_rlfc_2.mat
 %%
 % save K_incr_ST_6_KwH_rlfc_1.mat
 %%
@@ -147,7 +147,7 @@ plot(100*Gain_perc1)
 hold on
 plot(100*Gain_perc2)
 xlabel('No of MESS')
-ylabel('Gain percentage')
+ylabel('Gain Percentage')
 grid on
 ylim([0 inf])
 ax = gca;
@@ -156,7 +156,7 @@ ax.YGrid = 'on';
 yticks([0 2.5 5 7.5 10 12.5 15])
 legend(['R_L = ',num2str(1)],['R_L = ',num2str(2)],'location','northwest')
 %%
-print -depsc2 R_L_ST.eps
+print -depsc2 Fig6_R_L_ST.eps
 %%
 figure(33333)
 plot([abs(cost_red_mat_LP) ])
