@@ -13,9 +13,9 @@ clearvars -except MESS LP_cost ESS_cost_mat mg days
 close all;
 % load 100_mg_10d_Kwh.mat
 %m , d # of days
-% mg = 100; days =10;
+mg = 3; days =10;
 % # of MESS
-% MESS = 4;
+MESS = 4;
 if MESS > mg
        error('No of MESS > of Micro-grids')
 end
